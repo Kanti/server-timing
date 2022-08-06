@@ -1,0 +1,41 @@
+{
+  "name" : "kanti/server-timing",
+  "description" : "Show timings of Database and HTTP Calls",
+  "type" : "typo3-cms-extension",
+  "minimum-stability" : "stable",
+  "license" : "GPL-2.0+",
+  "authors" : [
+    {
+      "name" : "Matthias Vogel",
+      "email" : "git@kanti.de"
+    }
+  ],
+  "autoload" : {
+    "files" : [
+      "measure-php.php"
+    ],
+    "psr-4" : {
+      "Kanti\\ServerTiming\\" : "Classes/"
+    }
+  },
+  "require" : {
+    "php" : "^7.3 || ~8.0 || ~8.1",
+    "typo3/cms-core" : "9.* || 10.* || 11.*",
+    "typo3/cms-extbase" : "9.* || 10.* || 11.*"
+  },
+  "extra" : {
+    "typo3/cms" : {
+      "extension-key" : "server_timing"
+    },
+    "pluswerk/grumphp-config": {
+      "auto-setting": true
+    },
+    "grumphp": {
+      "config-default-path": "vendor/pluswerk/grumphp-config/grumphp.yml"
+    }
+  },
+  "require-dev": {
+    "pluswerk/grumphp-config": "^5.0",
+    "typo3/cms-adminpanel" : "9.* || 10.* || 11.*"
+  }
+}
