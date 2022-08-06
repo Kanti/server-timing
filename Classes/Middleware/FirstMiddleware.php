@@ -18,10 +18,10 @@ class FirstMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        TimingUtility::start('middleware Inward');
+        TimingUtility::start('middleware', 'Inward');
         $this->registerSqlLogger();
         $response = $handler->handle($request);
-        TimingUtility::end('middleware Outward');
+        TimingUtility::end('middleware');
         return $response;
     }
 
@@ -33,7 +33,7 @@ class FirstMiddleware implements MiddlewareInterface
             new class implements SQLLogger {
                 public function startQuery($sql, ?array $params = null, ?array $types = null)
                 {
-                    TimingUtility::start('sql', true);
+                    TimingUtility::start('sql', $sql);
                 }
 
                 public function stopQuery()

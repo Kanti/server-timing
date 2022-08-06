@@ -14,11 +14,11 @@ class LastMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        TimingUtility::end('middleware Inward');
+        TimingUtility::end('middleware');
         TimingUtility::start('requestHandler');
         $response = $handler->handle($request);
         TimingUtility::end('requestHandler');
-        TimingUtility::start('middleware Outward');
+        TimingUtility::start('middleware', 'Outward');
         return $response;
     }
 }

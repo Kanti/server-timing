@@ -15,11 +15,11 @@ class ExtbaseDispatcherV11 extends Dispatcher
 {
     public function dispatch(RequestInterface $request): ResponseInterface
     {
-        $str = 'extbase ' . str_replace('\\', '_', $request->getControllerObjectName());
+        $info = str_replace('\\', '_', $request->getControllerObjectName());
         if ($request instanceof Request) {
-            $str .= '->' . $request->getControllerActionName();
+            $info .= '->' . $request->getControllerActionName();
         }
-        $stop = TimingUtility::stopWatch($str);
+        $stop = TimingUtility::stopWatch('extbase', $info);
         $response = parent::dispatch($request);
         $stop();
         return $response;

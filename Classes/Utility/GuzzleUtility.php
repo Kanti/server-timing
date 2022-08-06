@@ -14,11 +14,11 @@ class GuzzleUtility
     {
         return static function (callable $handler): Closure {
             return static function (RequestInterface $request, array $options) use ($handler): FulfilledPromise {
-                $str = 'guzzle ' . $request->getMethod();
+                $info = $request->getMethod();
                 if ($request->getUri()) {
-                    $str .= ' ' . $request->getUri()->getHost();
+                    $info .= ' ' . $request->getUri()->getHost();
                 }
-                $stop = TimingUtility::stopWatch($str);
+                $stop = TimingUtility::stopWatch('guzzle', $info);
                 $response = $handler($request, $options);
                 $stop();
                 return $response;
