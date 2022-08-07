@@ -6,6 +6,9 @@ namespace Kanti\ServerTiming\Utility;
 
 use Closure;
 use Kanti\ServerTiming\Dto\StopWatch;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 final class TimingUtility
@@ -16,9 +19,14 @@ final class TimingUtility
     private static $stopWatchStack = [];
     /** @var bool */
     private static $registered = false;
+    /** @var bool|null */
+    private static $isBackendUser = null;
 
     public static function start(string $key, string $info = ''): void
     {
+        if (!self::isActive()) {
+            return;
+        }
         $s = self::stopWatch($key, $info);
         if (isset(self::$stopWatchStack[$key])) {
             throw new \Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
@@ -28,6 +36,9 @@ final class TimingUtility
 
     public static function end(string $key): void
     {
+        if (!self::isActive()) {
+            return;
+        }
         if (!isset(self::$stopWatchStack[$key])) {
             throw new \Exception('where is no measurement with this key');
         }
@@ -36,16 +47,20 @@ final class TimingUtility
         unset(self::$stopWatchStack[$key]);
     }
 
-    public static function stopWatch(string $key, string $info = '', bool $isTotal = false): StopWatch
+    public static function stopWatch(string $key, string $info = ''): StopWatch
     {
         $stopWatch = new StopWatch($key, $info);
-        self::$order[] = $stopWatch;
 
-        if (!self::$registered) {
-            register_shutdown_function(static function () {
-                self::shutdown();
-            });
-            self::$registered = true;
+        if (self::isActive()) {
+
+            self::$order[] = $stopWatch;
+
+            if (!self::$registered) {
+                register_shutdown_function(static function () {
+                    self::shutdown();
+                });
+                self::$registered = true;
+            }
         }
 
         return $stopWatch;
@@ -53,6 +68,9 @@ final class TimingUtility
 
     private static function shutdown(): void
     {
+        if (!self::isActive()) {
+            return;
+        }
         self::end('php');
         $timings = [];
         foreach (self::combineIfToMuch(self::$order) as $index => $time) {
@@ -133,9 +151,27 @@ final class TimingUtility
     private static function timingString(int $index, string $description, float $durationInSeconds): string
     {
         $description = substr($description, 0, 100);
-        $description = str_replace('\\', "_", $description);
-        $description = str_replace('"', "'", $description);
-        $description = str_replace(';', ",", $description);
+        $description = str_replace(['\\', '"', ';'], ["_", "'", ","], $description);
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
+    }
+
+    private static function isActive(): bool
+    {
+        if (PHP_SAPI === 'cli') {
+            return false;
+        }
+        if (self::$isBackendUser === false && Environment::getContext()->isProduction()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static function checkBackendUserStatus(): void
+    {
+        self::$isBackendUser = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
+        if (!self::isActive()) {
+            self::$order = [];
+            self::$stopWatchStack = [];
+        }
     }
 }

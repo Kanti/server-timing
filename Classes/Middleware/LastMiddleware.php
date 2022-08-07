@@ -14,6 +14,7 @@ class LastMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        TimingUtility::checkBackendUserStatus();
         TimingUtility::end('middleware');
         TimingUtility::start('requestHandler');
         $response = $handler->handle($request);
