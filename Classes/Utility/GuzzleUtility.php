@@ -16,7 +16,7 @@ class GuzzleUtility
             return static function (RequestInterface $request, array $options) use ($handler): FulfilledPromise {
                 $info = $request->getMethod();
                 if ($request->getUri()) {
-                    $info .= ' ' . $request->getUri()->getHost();
+                    $info .= ' ' . $request->getUri()->__toString();
                 }
                 $stop = TimingUtility::stopWatch('guzzle', $info);
                 $response = $handler($request, $options);
