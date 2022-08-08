@@ -126,7 +126,7 @@ final class TimingUtility
             $insertBefore[$key]->stopTime = $insertBefore[$key]->startTime + $sum;
 
             usort($stopWatches, static function (StopWatch $a, StopWatch $b) {
-                return $a->getDuration() <=> $b->getDuration();
+                return $b->getDuration() <=> $a->getDuration();
             });
 
             $biggestStopWatches = array_slice($stopWatches, 0, 3);
