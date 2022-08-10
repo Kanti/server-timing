@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Utility;
 
-use Closure;
 use Kanti\ServerTiming\Dto\StopWatch;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 final class TimingUtility
 {
@@ -52,7 +50,11 @@ final class TimingUtility
         $stopWatch = new StopWatch($key, $info);
 
         if (self::isActive()) {
-
+            if (!count(self::$order)) {
+                $phpStopWatch = new StopWatch('php', '');
+                $phpStopWatch->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
+                self::$order[] = $phpStopWatch;
+            }
             self::$order[] = $stopWatch;
 
             if (!self::$registered) {
@@ -71,7 +73,6 @@ final class TimingUtility
         if (!self::isActive()) {
             return;
         }
-        self::end('php');
         $timings = [];
         foreach (self::combineIfToMuch(self::$order) as $index => $time) {
             $timings[] = self::timingString($index, trim($time->key . ' ' . $time->info), $time->getDuration());
@@ -91,13 +92,9 @@ final class TimingUtility
     private static function combineIfToMuch(array $initalStopWatches): array
     {
         $elementsByKey = [];
-        $removeInfo = false; // TODO add option
         foreach ($initalStopWatches as $stopWatch) {
             if (!isset($elementsByKey[$stopWatch->key])) {
                 $elementsByKey[$stopWatch->key] = [];
-            }
-            if ($removeInfo && $stopWatch->info) {
-                $stopWatch->info = '<censored>';
             }
             $elementsByKey[$stopWatch->key][] = $stopWatch;
         }
@@ -166,9 +163,12 @@ final class TimingUtility
         return true;
     }
 
+    /**
+     * @internal
+     */
     public static function checkBackendUserStatus(): void
     {
-        self::$isBackendUser = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
+        self::$isBackendUser = (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
         if (!self::isActive()) {
             self::$order = [];
             self::$stopWatchStack = [];

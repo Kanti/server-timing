@@ -1,0 +1,8 @@
+parameters:
+  level: max
+  paths:
+    - Classes/
+    - Tests/
+  excludePaths:
+    - Classes/XClass/ExtbaseDispatcherLegacy.php
+    - Classes/XClass/ExtbaseDispatcherV11.php

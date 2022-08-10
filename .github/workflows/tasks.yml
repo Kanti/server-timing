@@ -1,0 +1,52 @@
+name: Tasks
+
+on: [push, pull_request]
+
+jobs:
+  lint-php:
+    name: "php: ${{ matrix.php }} TYPO3: ${{ matrix.typo3 }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.3', '7.4', '8.0', '8.1' ]
+        typo3: [ '9', '10', '11' ]
+        exclude:
+          - php: '7.3'
+            typo3: '11'
+
+          - php: '8.0'
+            typo3: '10'
+          - php: '8.1'
+            typo3: '10'
+
+          - php: '8.0'
+            typo3: '9'
+          - php: '8.1'
+            typo3: '9'
+    steps:
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+#      - uses: mirromutth/mysql-action@v1.1
+#        with:
+#          mysql version: '5.7'
+#          mysql database: 'typo3_test'
+#          mysql root password: 'root'
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.php }}-composer-
+      - run: composer require typo3/minimal="^${{ matrix.typo3 }}" --dev
+      - run: composer install --no-interaction --no-progress
+      - run: ./vendor/bin/grumphp run --ansi
+      - run: composer test
+      - run: jq 'del(.logs.html)' infection.json > infection.json.new && mv infection.json.new infection.json
+      - run: composer infection
+      - uses: codecov/codecov-action@v1
+        with:
+          file: var/test-result/clover.xml
