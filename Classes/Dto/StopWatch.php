@@ -28,7 +28,7 @@ final class StopWatch
         return $this->stopTime - $this->startTime;
     }
 
-    public function __invoke()
+    public function __invoke(): void
     {
         $this->stopTime = microtime(true);
     }

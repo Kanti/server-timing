@@ -7,9 +7,10 @@ use Kanti\ServerTiming\XClass\CoreRequestFactory;
 use Kanti\ServerTiming\XClass\ExtbaseDispatcherV11;
 use TYPO3\CMS\Adminpanel\Middleware\SqlLogging;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Extbase\Mvc\Dispatcher;
 
-if (version_compare(TYPO3_branch, '11.0', '>=')) {
+if (version_compare((new Typo3Version())->getBranch(), '11.0', '>=')) {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][Dispatcher::class] = [
         'className' => ExtbaseDispatcherV11::class,
     ];
@@ -22,7 +23,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][SqlLogging::class] = [
     'className' => AdminpanelSqlLoggingMiddleware::class,
 ];
 
-if (version_compare(TYPO3_branch, '10.0', '<')) {
+if (version_compare((new Typo3Version())->getBranch(), '10.0', '<')) {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][RequestFactory::class] = [
         'className' => CoreRequestFactory::class,
     ];

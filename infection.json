@@ -1,0 +1,20 @@
+{
+  "$schema": "vendor/infection/infection/resources/schema.json",
+  "source": {
+    "directories": [
+      "Classes"
+    ]
+  },
+  "phpUnit": {
+    "configDir": "."
+  },
+  "logs": {
+    "text": "var/infection.log",
+    "html": "var/infection.html"
+  },
+  "minCoveredMsi": 95,
+  "initialTestsPhpOptions": "-d pcov.enabled=1",
+  "mutators": {
+    "@default": true
+  }
+}

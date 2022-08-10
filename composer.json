@@ -11,31 +11,51 @@
     }
   ],
   "autoload" : {
-    "files" : [
-      "measure-php.php"
-    ],
     "psr-4" : {
       "Kanti\\ServerTiming\\" : "Classes/"
     }
+  },
+  "autoload-dev" : {
+    "psr-4" : {
+      "Kanti\\ServerTiming\\Tests\\" : "Tests/"
+    }
+  },
+  "extra" : {
+    "typo3/cms" : {
+      "extension-key" : "server_timing"
+    },
+    "pluswerk/grumphp-config" : {
+      "auto-setting": false
+    },
+    "grumphp" : {
+      "config-default-path" : "grumphp.yml"
+    }
+  },
+  "config" : {
+    "allow-plugins" : {
+      "typo3/class-alias-loader": true,
+      "typo3/cms-composer-installers": true,
+      "phpro/grumphp": true,
+      "pluswerk/grumphp-config": true,
+      "infection/extension-installer": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "scripts" : {
+    "test" : "@php -d pcov.enabled=1 ./vendor/bin/phpunit",
+    "infection" : "infection --only-covered"
   },
   "require" : {
     "php" : "^7.3 || ~8.0 || ~8.1",
     "typo3/cms-core" : "9.* || 10.* || 11.*",
     "typo3/cms-extbase" : "9.* || 10.* || 11.*"
   },
-  "extra" : {
-    "typo3/cms" : {
-      "extension-key" : "server_timing"
-    },
-    "pluswerk/grumphp-config": {
-      "auto-setting": true
-    },
-    "grumphp": {
-      "config-default-path": "vendor/pluswerk/grumphp-config/grumphp.yml"
-    }
-  },
-  "require-dev": {
-    "pluswerk/grumphp-config": "^5.0",
-    "typo3/cms-adminpanel" : "9.* || 10.* || 11.*"
+  "require-dev" : {
+    "pluswerk/grumphp-config" : "^4.0 || ^5.0",
+    "typo3/cms-adminpanel" : "9.* || 10.* || 11.*",
+    "phpunit/phpunit" : "^9.5",
+    "infection/infection" : "^0.18.2 || ^0.26.13",
+    "saschaegerer/phpstan-typo3": "^1.1",
+    "phpstan/extension-installer": "^1.1"
   }
 }
