@@ -2,10 +2,10 @@
 
 ## todos:
 
-- if non total have many requests, sum them up (maybe show top 3?)
 - test with admin panel
-- include BE_USER OR !Production condition
-- 3 modes? none, withoutInfo, all
+- documentation
+- more tests
+- auto release int TER
 
 ## included:
 
@@ -13,7 +13,7 @@
 - middleware stack
 - Application Request Handler
 - extbase actions
-- database requests (total)
+- database requests
 - guzzle requests
 
 ## composer patches needed?
@@ -22,9 +22,6 @@
 
 ## wanted:
 
-- github action
-- auto release int TER
-- unit tests
 - functional tests
 
 ## nice to have?
