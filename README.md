@@ -1,4 +1,4 @@
-# Documentation
+# EXT:server_timing - see your performance
 
 ![Server-Timing](./Documentation/Server-Timing.png)
 
@@ -7,6 +7,8 @@
 `composer require kanti/server-timing`
 
 at the moment there is nothing to configure
+
+> Server timings are not displayed in production for users who are not logged into the backend.
 
 ## Included measurements:
 
