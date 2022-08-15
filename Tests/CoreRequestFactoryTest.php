@@ -23,6 +23,7 @@ class CoreRequestFactoryTest extends TestCase
         $this->setUpTypo3ConfVars();
 
         $this->expectExceptionMessage('Call to protected method Kanti\ServerTiming\XClass\CoreRequestFactory::getClient()');
+        /** @phpstan-ignore-next-line */
         (new CoreRequestFactory())->getClient();
     }
 
@@ -47,10 +48,8 @@ class CoreRequestFactoryTest extends TestCase
             'verify' => true,
             'handler' => [
                 'testKey' => function () {
-
                 },
             ],
         ];
     }
-
 }

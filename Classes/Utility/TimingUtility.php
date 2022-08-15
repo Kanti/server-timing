@@ -11,7 +11,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TimingUtility
 {
-
     /** @var TimingUtility|null */
     private static $instance = null;
     /** @var bool */
@@ -28,6 +27,7 @@ final class TimingUtility
 
     /**
      * only for tests
+     * @phpstan-ignore-next-line
      */
     private static function resetInstance(): void
     {

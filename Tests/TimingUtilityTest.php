@@ -163,16 +163,24 @@ class TimingUtilityTest extends TestCase
         ];
         $combined = new StopWatch('key', 'count:5');
         $combined->startTime = $stopWatchA->startTime;
-        $combined->stopTime = $stopWatchA->startTime + $stopWatchA->getDuration() + $stopWatchB->getDuration() + $stopWatchBig1->getDuration(
-            ) + $stopWatchD->getDuration() + $stopWatchBig2->getDuration();
+        $combined->stopTime = $stopWatchA->startTime
+            + $stopWatchA->getDuration()
+            + $stopWatchB->getDuration()
+            + $stopWatchBig1->getDuration()
+            + $stopWatchD->getDuration()
+            + $stopWatchBig2->getDuration();
         yield 'combine:simple' => [
             [$combined, $stopWatchA, $stopWatchBig1, $stopWatchBig2],
             [$stopWatchA, $stopWatchB, $stopWatchBig1, $stopWatchD, $stopWatchBig2],
         ];
         $combined = new StopWatch('key', 'count:5');
         $combined->startTime = $stopWatchB->startTime;
-        $combined->stopTime = $stopWatchB->startTime + $stopWatchA->getDuration() + $stopWatchB->getDuration() + $stopWatchBig1->getDuration(
-            ) + $stopWatchD->getDuration() + $stopWatchBig2->getDuration();
+        $combined->stopTime = $stopWatchB->startTime
+            + $stopWatchA->getDuration()
+            + $stopWatchB->getDuration()
+            + $stopWatchBig1->getDuration()
+            + $stopWatchD->getDuration()
+            + $stopWatchBig2->getDuration();
         yield 'combine:keepOrder' => [
             [$stopWatchX, $combined, $stopWatchB, $stopWatchBig1, $stopWatchX2, $stopWatchBig2],
             [$stopWatchX, $stopWatchB, $stopWatchBig1, $stopWatchX2, $stopWatchD, $stopWatchBig2, $stopWatchA],
@@ -182,9 +190,6 @@ class TimingUtilityTest extends TestCase
     /**
      * @test
      * @covers ::isActive
-     *
-     * @param StopWatch[] $expected
-     * @param StopWatch[] $initalStopWatches
      */
     public function isActive(): void
     {
@@ -218,9 +223,6 @@ class TimingUtilityTest extends TestCase
      * @test
      * @covers ::getInstance
      * @covers ::resetInstance
-     *
-     * @param StopWatch[] $expected
-     * @param StopWatch[] $initalStopWatches
      */
     public function getInstance(): void
     {
