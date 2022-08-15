@@ -11,55 +11,89 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TimingUtility
 {
-    /** @var StopWatch[] */
-    private static $order = [];
-    /** @var array<string, StopWatch> */
-    private static $stopWatchStack = [];
+    /** @var TimingUtility|null */
+    private static $instance = null;
     /** @var bool */
     private static $registered = false;
     /** @var bool|null */
     private static $isBackendUser = null;
+    /** @var bool */
+    private static $isCli = PHP_SAPI === 'cli';
+
+    public static function getInstance(): TimingUtility
+    {
+        return self::$instance = self::$instance ?? new self();
+    }
+
+    /**
+     * only for tests
+     * @phpstan-ignore-next-line
+     */
+    private static function resetInstance(): void
+    {
+        self::$instance = null;
+    }
+
+    /** @var StopWatch[] */
+    private $order = [];
+    /** @var array<string, StopWatch> */
+    private $stopWatchStack = [];
 
     public static function start(string $key, string $info = ''): void
     {
-        if (!self::isActive()) {
+        self::getInstance()->startInternal($key, $info);
+    }
+
+    public function startInternal(string $key, string $info = ''): void
+    {
+        if (!$this->isActive()) {
             return;
         }
-        $s = self::stopWatch($key, $info);
-        if (isset(self::$stopWatchStack[$key])) {
+        $stop = $this->stopWatchInternal($key, $info);
+        if (isset($this->stopWatchStack[$key])) {
             throw new \Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
         }
-        self::$stopWatchStack[$key] = $s;
+        $this->stopWatchStack[$key] = $stop;
     }
 
     public static function end(string $key): void
     {
-        if (!self::isActive()) {
+        self::getInstance()->endInternal($key);
+    }
+
+    public function endInternal(string $key): void
+    {
+        if (!$this->isActive()) {
             return;
         }
-        if (!isset(self::$stopWatchStack[$key])) {
+        if (!isset($this->stopWatchStack[$key])) {
             throw new \Exception('where is no measurement with this key');
         }
-        $stop = self::$stopWatchStack[$key];
+        $stop = $this->stopWatchStack[$key];
         $stop();
-        unset(self::$stopWatchStack[$key]);
+        unset($this->stopWatchStack[$key]);
     }
 
     public static function stopWatch(string $key, string $info = ''): StopWatch
     {
+        return self::getInstance()->stopWatchInternal($key, $info);
+    }
+
+    public function stopWatchInternal(string $key, string $info = ''): StopWatch
+    {
         $stopWatch = new StopWatch($key, $info);
 
-        if (self::isActive()) {
-            if (!count(self::$order)) {
+        if ($this->isActive()) {
+            if (!count($this->order)) {
                 $phpStopWatch = new StopWatch('php', '');
                 $phpStopWatch->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
-                self::$order[] = $phpStopWatch;
+                $this->order[] = $phpStopWatch;
             }
-            self::$order[] = $stopWatch;
+            $this->order[] = $stopWatch;
 
             if (!self::$registered) {
                 register_shutdown_function(static function () {
-                    self::shutdown();
+                    self::getInstance()->shutdown();
                 });
                 self::$registered = true;
             }
@@ -68,17 +102,17 @@ final class TimingUtility
         return $stopWatch;
     }
 
-    private static function shutdown(): void
+    private function shutdown(): void
     {
-        if (!self::isActive()) {
+        if (!$this->isActive()) {
             return;
         }
         $timings = [];
-        foreach (self::combineIfToMuch(self::$order) as $index => $time) {
-            $timings[] = self::timingString($index, trim($time->key . ' ' . $time->info), $time->getDuration());
+        foreach ($this->combineIfToMuch($this->order) as $index => $time) {
+            $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info), $time->getDuration());
         }
         if (count($timings) > 70) {
-            $timings = [self::timingString(0, 'To Many measurements ' . count($timings), 0.000001)];
+            $timings = [$this->timingString(0, 'To Many measurements ' . count($timings), 0.000001)];
         }
         if ($timings) {
             header(sprintf('Server-Timing: %s', implode(',', $timings)), false);
@@ -89,7 +123,7 @@ final class TimingUtility
      * @param StopWatch[] $initalStopWatches
      * @return StopWatch[]
      */
-    private static function combineIfToMuch(array $initalStopWatches): array
+    private function combineIfToMuch(array $initalStopWatches): array
     {
         $elementsByKey = [];
         foreach ($initalStopWatches as $stopWatch) {
@@ -145,16 +179,16 @@ final class TimingUtility
         return $result;
     }
 
-    private static function timingString(int $index, string $description, float $durationInSeconds): string
+    private function timingString(int $index, string $description, float $durationInSeconds): string
     {
         $description = substr($description, 0, 100);
         $description = str_replace(['\\', '"', ';'], ["_", "'", ","], $description);
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
     }
 
-    private static function isActive(): bool
+    public function isActive(): bool
     {
-        if (PHP_SAPI === 'cli') {
+        if (self::$isCli) {
             return false;
         }
         if (self::$isBackendUser === false && Environment::getContext()->isProduction()) {
@@ -166,12 +200,11 @@ final class TimingUtility
     /**
      * @internal
      */
-    public static function checkBackendUserStatus(): void
+    public function checkBackendUserStatus(): void
     {
         self::$isBackendUser = (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
-        if (!self::isActive()) {
-            self::$order = [];
-            self::$stopWatchStack = [];
+        if (!$this->isActive()) {
+            self::$instance = null;
         }
     }
 }
