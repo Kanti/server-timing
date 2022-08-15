@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Middleware;
 
+use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -15,11 +16,16 @@ class LastMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         TimingUtility::getInstance()->checkBackendUserStatus();
-        TimingUtility::end('middleware');
-        TimingUtility::start('requestHandler');
+        $stop = $request->getAttribute('server-timing:middleware:inward');
+        if ($stop instanceof StopWatch) {
+            $stop();
+        }
+        $request = $request->withoutAttribute('server-timing:middleware:inward');
+        $stop = TimingUtility::stopWatch('requestHandler');
         $response = $handler->handle($request);
-        TimingUtility::end('requestHandler');
-        TimingUtility::start('middleware', 'Outward');
+        $stop();
+        // @phpstan-ignore-next-line
+        $response->stopWatch = TimingUtility::stopWatch('middleware', 'Outward');
         return $response;
     }
 }

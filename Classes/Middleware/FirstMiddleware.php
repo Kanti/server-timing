@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\Middleware;
 
 use Doctrine\DBAL\Logging\SQLLogger;
+use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,10 +19,15 @@ class FirstMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        TimingUtility::start('middleware', 'Inward');
+        $stop = TimingUtility::stopWatch('middleware', 'Inward');
+        $request = $request->withAttribute('server-timing:middleware:inward', $stop);
         $this->registerSqlLogger();
         $response = $handler->handle($request);
-        TimingUtility::end('middleware');
+        // @phpstan-ignore-next-line
+        $stop = $response->stopWatch;
+        if ($stop instanceof StopWatch) {
+            $stop();
+        }
         return $response;
     }
 
@@ -31,14 +37,25 @@ class FirstMiddleware implements MiddlewareInterface
         $connection = $connectionPool->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
         $connection->getConfiguration()->setSQLLogger(
             new class implements SQLLogger {
+                /** @var StopWatch|null */
+                private $stopWatch = null;
+
                 public function startQuery($sql, ?array $params = null, ?array $types = null)
                 {
-                    TimingUtility::start('sql', $sql);
+                    $stop = $this->stopWatch;
+                    if ($stop instanceof StopWatch) {
+                        $stop();
+                    }
+                    $this->stopWatch = TimingUtility::stopWatch('sql', $sql);
                 }
 
                 public function stopQuery()
                 {
-                    TimingUtility::end('sql');
+                    $stop = $this->stopWatch;
+                    if ($stop instanceof StopWatch) {
+                        $stop();
+                        $this->stopWatch = null;
+                    }
                 }
             }
         );

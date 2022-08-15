@@ -14,6 +14,8 @@ return [
             'after' => [
                 'solr/service/pageexporter',
                 'typo3/cms-frontend/output-compression',
+                'fluidtypo3/vhs/asset-inclusion',
+                'apache-solr-for-typo3/page-indexer-finisher',
             ],
         ],
     ],
@@ -32,6 +34,7 @@ return [
                 'typo3/cms-backend/response-headers',
                 'typo3/cms-backend/site-resolver',
                 'typo3/cms-backend/legacy-document-template',
+                'typo3/cms-extbase/signal-slot-deprecator',
             ],
         ],
     ],
