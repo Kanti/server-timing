@@ -12,7 +12,7 @@
     "text": "var/infection.log",
     "html": "var/infection.html"
   },
-  "minCoveredMsi": 95,
+  "minCoveredMsi": 89,
   "initialTestsPhpOptions": "-d pcov.enabled=1",
   "mutators": {
     "@default": true

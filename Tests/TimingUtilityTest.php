@@ -15,7 +15,9 @@ class TimingUtilityTest extends TestCase
 {
     /**
      * @test
+     * @covers ::getInstance
      * @covers ::stopWatch
+     * @covers ::stopWatchInternal
      * @covers ::isActive
      * @covers \Kanti\ServerTiming\Dto\StopWatch
      */
@@ -34,7 +36,21 @@ class TimingUtilityTest extends TestCase
 
     /**
      * @test
+     * @covers ::stopWatchInternal
+     * @covers ::isActive
+     * @covers \Kanti\ServerTiming\Dto\StopWatch
+     */
+    public function stopWatchInternal(): void
+    {
+        (new TimingUtility())->stopWatchInternal('test');
+        self::assertTrue(true, 'isCallable');
+    }
+
+    /**
+     * @test
+     * @covers ::getInstance
      * @covers ::stopWatch
+     * @covers ::stopWatchInternal
      * @covers ::isActive
      * @covers \Kanti\ServerTiming\Dto\StopWatch
      */
@@ -60,7 +76,7 @@ class TimingUtilityTest extends TestCase
         $reflection = new \ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('timingString');
         $reflectionMethod->setAccessible(true);
-        $result = $reflectionMethod->invoke(null, ...$args);
+        $result = $reflectionMethod->invoke(new TimingUtility(), ...$args);
         self::assertEquals($expected, $result);
     }
 
@@ -87,7 +103,7 @@ class TimingUtilityTest extends TestCase
     /**
      * @test
      * @covers ::combineIfToMuch
-     * @covers \Kanti\ServerTiming\Dto\StopWatch
+     * @covers       \Kanti\ServerTiming\Dto\StopWatch
      * @dataProvider dataProviderCombineIfToMuch
      *
      * @param StopWatch[] $expected
@@ -101,7 +117,7 @@ class TimingUtilityTest extends TestCase
         }, $initalStopWatches);
         $reflectionMethod = $reflection->getMethod('combineIfToMuch');
         $reflectionMethod->setAccessible(true);
-        $result = $reflectionMethod->invoke(null, $initalStopWatches);
+        $result = $reflectionMethod->invoke(new TimingUtility(), $initalStopWatches);
         self::assertEqualsWithDelta($expected, $result, 0.00001);
     }
 
@@ -147,17 +163,74 @@ class TimingUtilityTest extends TestCase
         ];
         $combined = new StopWatch('key', 'count:5');
         $combined->startTime = $stopWatchA->startTime;
-        $combined->stopTime = $stopWatchA->startTime + $stopWatchA->getDuration() + $stopWatchB->getDuration() + $stopWatchBig1->getDuration() + $stopWatchD->getDuration() + $stopWatchBig2->getDuration();
+        $combined->stopTime = $stopWatchA->startTime + $stopWatchA->getDuration() + $stopWatchB->getDuration() + $stopWatchBig1->getDuration(
+            ) + $stopWatchD->getDuration() + $stopWatchBig2->getDuration();
         yield 'combine:simple' => [
             [$combined, $stopWatchA, $stopWatchBig1, $stopWatchBig2],
             [$stopWatchA, $stopWatchB, $stopWatchBig1, $stopWatchD, $stopWatchBig2],
         ];
         $combined = new StopWatch('key', 'count:5');
         $combined->startTime = $stopWatchB->startTime;
-        $combined->stopTime = $stopWatchB->startTime + $stopWatchA->getDuration() + $stopWatchB->getDuration() + $stopWatchBig1->getDuration() + $stopWatchD->getDuration() + $stopWatchBig2->getDuration();
+        $combined->stopTime = $stopWatchB->startTime + $stopWatchA->getDuration() + $stopWatchB->getDuration() + $stopWatchBig1->getDuration(
+            ) + $stopWatchD->getDuration() + $stopWatchBig2->getDuration();
         yield 'combine:keepOrder' => [
-            [$stopWatchX, $combined, $stopWatchB, $stopWatchBig1, $stopWatchX2,  $stopWatchBig2],
+            [$stopWatchX, $combined, $stopWatchB, $stopWatchBig1, $stopWatchX2, $stopWatchBig2],
             [$stopWatchX, $stopWatchB, $stopWatchBig1, $stopWatchX2, $stopWatchD, $stopWatchBig2, $stopWatchA],
         ];
+    }
+
+    /**
+     * @test
+     * @covers ::isActive
+     *
+     * @param StopWatch[] $expected
+     * @param StopWatch[] $initalStopWatches
+     */
+    public function isActive(): void
+    {
+        $reflection = new \ReflectionClass(TimingUtility::class);
+        $isCli = $reflection->getProperty('isCli');
+        $isCli->setAccessible(true);
+
+        $isBackendUser = $reflection->getProperty('isBackendUser');
+        $isBackendUser->setAccessible(true);
+
+        $timingUtility = new TimingUtility();
+
+        $isCli->setValue(false);
+        $isBackendUser->setValue(true);
+        self::assertTrue($timingUtility->isActive());
+
+        $isCli->setValue(true);
+        $isBackendUser->setValue(true);
+        self::assertFalse($timingUtility->isActive());
+
+        $isCli->setValue(true);
+        $isBackendUser->setValue(false);
+        self::assertFalse($timingUtility->isActive());
+
+        $isCli->setValue(true);
+        $isBackendUser->setValue(null);
+        self::assertFalse($timingUtility->isActive());
+    }
+
+    /**
+     * @test
+     * @covers ::getInstance
+     * @covers ::resetInstance
+     *
+     * @param StopWatch[] $expected
+     * @param StopWatch[] $initalStopWatches
+     */
+    public function getInstance(): void
+    {
+        $firstInstance = TimingUtility::getInstance();
+        self::assertSame($firstInstance, TimingUtility::getInstance());
+
+        $reflection = new \ReflectionClass(TimingUtility::class);
+        $resetInstance = $reflection->getMethod('resetInstance');
+        $resetInstance->setAccessible(true);
+        $resetInstance->invoke(null);
+        self::assertNotSame($firstInstance, TimingUtility::getInstance());
     }
 }
