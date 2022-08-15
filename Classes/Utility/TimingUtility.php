@@ -22,7 +22,7 @@ final class TimingUtility
 
     public static function getInstance(): TimingUtility
     {
-        return self::$instance ??= new self();
+        return self::$instance = self::$instance ?? new self();
     }
 
     /**
