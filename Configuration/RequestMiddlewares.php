@@ -16,6 +16,8 @@ return [
                 'typo3/cms-frontend/output-compression',
                 'fluidtypo3/vhs/asset-inclusion',
                 'apache-solr-for-typo3/page-indexer-finisher',
+                'solr/service/pageexporter',
+                'typo3/cms-adminpanel/data-persister',
             ],
         ],
     ],
