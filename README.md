@@ -49,7 +49,6 @@ at the moment there is nothing to configure
 
 ## todos:
 
-- test with admin panel
 - more tests
 - auto release int TER
 
