@@ -182,7 +182,7 @@ final class TimingUtility
     private function timingString(int $index, string $description, float $durationInSeconds): string
     {
         $description = substr($description, 0, 100);
-        $description = str_replace(['\\', '"', ';'], ["_", "'", ","], $description);
+        $description = str_replace(['\\', '"', ';', "\r", "\n"], ["_", "'", ",", "", ""], $description);
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
     }
 
