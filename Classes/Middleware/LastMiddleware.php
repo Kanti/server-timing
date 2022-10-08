@@ -24,8 +24,7 @@ class LastMiddleware implements MiddlewareInterface
         $stop = TimingUtility::stopWatch('requestHandler');
         $response = $handler->handle($request);
         $stop();
-        // @phpstan-ignore-next-line
-        $response->stopWatch = TimingUtility::stopWatch('middleware', 'Outward');
+        \Kanti\ServerTiming\Middleware\FirstMiddleware::$stopWatchOutward = TimingUtility::stopWatch('middleware', 'Outward');
         return $response;
     }
 }

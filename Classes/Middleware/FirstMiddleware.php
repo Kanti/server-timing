@@ -17,14 +17,16 @@ use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 class FirstMiddleware implements MiddlewareInterface
 {
+    /** @var StopWatch|null  */
+    public static $stopWatchOutward = null;
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $stop = TimingUtility::stopWatch('middleware', 'Inward');
         $request = $request->withAttribute('server-timing:middleware:inward', $stop);
         $this->registerSqlLogger();
         $response = $handler->handle($request);
-        // @phpstan-ignore-next-line
-        $stop = $response->stopWatch;
+        $stop = self::$stopWatchOutward;
         if ($stop instanceof StopWatch) {
             $stop();
         }
