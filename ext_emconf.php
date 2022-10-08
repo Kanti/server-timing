@@ -15,7 +15,7 @@ $EM_CONF[$_EXTKEY] = [
     'version' => \Kanti\ServerTiming\Utility\VersionUtility::getVersion(),
     'constraints' => [
         'depends' => [
-            'typo3' => '10.4.0-10.4.999',
+            'typo3' => '9.0.0-11.999.999',
         ],
         'conflicts' => [],
         'suggests' => [],
