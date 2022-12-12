@@ -9,18 +9,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.4', '8.0', '8.1' ]
-        typo3: [ '9', '10', '11' ]
+        php: [ '7.4', '8.0', '8.1', '8.2' ]
+        typo3: [ '10', '11' ]
         exclude:
           - php: '8.0'
             typo3: '10'
           - php: '8.1'
             typo3: '10'
-
-          - php: '8.0'
-            typo3: '9'
-          - php: '8.1'
-            typo3: '9'
+          - php: '8.2'
+            typo3: '10'
     steps:
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
@@ -38,8 +35,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.php }}-composer-
-      - run: composer require typo3/minimal="^${{ matrix.typo3 }}" --dev
-      - run: composer install --no-interaction --no-progress
+      - run: composer require typo3/minimal="^${{ matrix.typo3 }}" --dev --ignore-platform-req=php+
+      - run: composer install --no-interaction --no-progress --ignore-platform-req=php+
       - run: ./vendor/bin/grumphp run --ansi
       - run: composer test
       - run: jq 'del(.logs.html)' infection.json > infection.json.new && mv infection.json.new infection.json
@@ -77,7 +74,7 @@ jobs:
 
       - name: Upload EXT:server_timing to TER
         run: |
-          sed -i 's/\\Kanti\\ServerTiming\\Utility\\VersionUtility::getVersion()/'\''${{ steps.get_version.outputs.VERSION }}'\''/g' ext_emconf.php \
+          sed -i 's/\\Composer\\InstalledVersions::getPrettyVersion('\''kanti\/server-timing'\'')/'\''${{ steps.get_version.outputs.VERSION }}'\''/g' ext_emconf.php \
           && git config --global user.email "no@one" \
           && git config --global user.name "No One" \
           && git add ext_emconf.php \

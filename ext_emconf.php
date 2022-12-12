@@ -12,10 +12,10 @@ $EM_CONF[$_EXTKEY] = [
     'uploadfolder' => '0',
     'createDirs' => '',
     'clearCacheOnLoad' => 0,
-    'version' => \Kanti\ServerTiming\Utility\VersionUtility::getVersion(),
+    'version' => \Composer\InstalledVersions::getPrettyVersion('kanti/server-timing'),
     'constraints' => [
         'depends' => [
-            'typo3' => '9.0.0-11.999.999',
+            'typo3' => '10.0.0-11.999.999',
         ],
         'conflicts' => [],
         'suggests' => [],
