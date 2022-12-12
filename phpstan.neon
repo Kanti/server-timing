@@ -6,3 +6,6 @@ parameters:
   excludePaths:
     - Classes/XClass/ExtbaseDispatcherLegacy.php
     - Classes/XClass/ExtbaseDispatcherV11.php
+  typo3:
+      requestGetAttributeMapping:
+          server-timing:middleware:inward: Kanti\ServerTiming\Dto\StopWatch|null
