@@ -37,6 +37,7 @@ return [
                 'typo3/cms-backend/site-resolver',
                 'typo3/cms-backend/legacy-document-template',
                 'typo3/cms-extbase/signal-slot-deprecator',
+                'typo3/cms-core/response-propagation',
             ],
         ],
     ],

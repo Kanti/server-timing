@@ -23,9 +23,4 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][SqlLogging::class] = [
     'className' => AdminpanelSqlLoggingMiddleware::class,
 ];
 
-if (version_compare((new Typo3Version())->getBranch(), '10.0', '<')) {
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][RequestFactory::class] = [
-        'className' => CoreRequestFactory::class,
-    ];
-}
 $GLOBALS['TYPO3_CONF_VARS']['HTTP']['handler']['server_timing'] = GuzzleUtility::getHandler();
