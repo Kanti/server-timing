@@ -50,7 +50,6 @@ at the moment there is nothing to configure
 ## todos:
 
 - more tests
-- auto release int TER
 
 ## composer patches needed?
 
