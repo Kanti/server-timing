@@ -4,40 +4,40 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Utility;
 
+use Exception;
 use Kanti\ServerTiming\Dto\StopWatch;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use SplObjectStorage;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TimingUtility
 {
-    /** @var TimingUtility|null */
-    private static $instance = null;
-    /** @var bool */
-    private static $registered = false;
-    /** @var bool|null */
-    private static $isBackendUser = null;
-    /** @var bool */
-    private static $isCli = PHP_SAPI === 'cli';
+    private static ?TimingUtility $instance = null;
+
+    private static bool $registered = false;
+
+    private static ?bool $isBackendUser = null;
+
+    /**
+     * @var bool
+     */
+    private const IS_CLI = PHP_SAPI === 'cli';
+
+    private bool $alreadyShutdown = false;
 
     public static function getInstance(): TimingUtility
     {
-        return self::$instance = self::$instance ?? new self();
-    }
-
-    /**
-     * only for tests
-     * @phpstan-ignore-next-line
-     */
-    private static function resetInstance(): void
-    {
-        self::$instance = null;
+        return self::$instance ??= new self();
     }
 
     /** @var StopWatch[] */
-    private $order = [];
+    private array $order = [];
+
     /** @var array<string, StopWatch> */
-    private $stopWatchStack = [];
+    private array $stopWatchStack = [];
 
     public static function start(string $key, string $info = ''): void
     {
@@ -49,10 +49,12 @@ final class TimingUtility
         if (!$this->isActive()) {
             return;
         }
+
         $stop = $this->stopWatchInternal($key, $info);
         if (isset($this->stopWatchStack[$key])) {
-            throw new \Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
+            throw new Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
         }
+
         $this->stopWatchStack[$key] = $stop;
     }
 
@@ -66,9 +68,11 @@ final class TimingUtility
         if (!$this->isActive()) {
             return;
         }
+
         if (!isset($this->stopWatchStack[$key])) {
-            throw new \Exception('where is no measurement with this key');
+            throw new Exception('where is no measurement with this key');
         }
+
         $stop = $this->stopWatchStack[$key];
         $stop();
         unset($this->stopWatchStack[$key]);
@@ -89,10 +93,11 @@ final class TimingUtility
                 $phpStopWatch->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
                 $this->order[] = $phpStopWatch;
             }
+
             $this->order[] = $stopWatch;
 
             if (!self::$registered) {
-                register_shutdown_function(static function () {
+                register_shutdown_function(static function (): void {
                     self::getInstance()->shutdown();
                 });
                 self::$registered = true;
@@ -102,21 +107,62 @@ final class TimingUtility
         return $stopWatch;
     }
 
-    private function shutdown(): void
+    /**
+     * if called with Response object than it will add the Server-Timing header to that response and return it.
+     * if called without it will set the header with the header() function. (called from shutdown function)
+     * @template T of ResponseInterface|null
+     * @param T|null $response
+     * @return (T is ResponseInterface ? ResponseInterface : null)
+     */
+    public function shutdown(?ServerRequestInterface $request = null, ?ResponseInterface $response = null): ?ResponseInterface
     {
         if (!$this->isActive()) {
-            return;
+            return $response;
         }
+
+        $this->alreadyShutdown = true;
+
+
+        foreach (array_reverse($this->order) as $stopWatch) {
+            if ($stopWatch->stopTime === null) {
+                $stopWatch->stop();
+            }
+        }
+
+        GeneralUtility::makeInstance(SentryUtility::class)->sendSentryTrace($request ?? $GLOBALS['TYPO3_REQUEST'], $this->order);
+
         $timings = [];
         foreach ($this->combineIfToMuch($this->order) as $index => $time) {
             $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info), $time->getDuration());
         }
+
         if (count($timings) > 70) {
             $timings = [$this->timingString(0, 'To Many measurements ' . count($timings), 0.000001)];
         }
-        if ($timings) {
-            header(sprintf('Server-Timing: %s', implode(',', $timings)), false);
+
+
+        $headerString = implode(',', $timings);
+        if (!$timings) {
+            return $response;
         }
+
+        $memoryUsage = $this->humanReadableFileSize(memory_get_peak_usage());
+        if ($response) {
+            return $response
+                ->withAddedHeader('Server-Timing', $headerString)
+                ->withAddedHeader('X-Max-Memory-Usage', $memoryUsage);
+        }
+
+        header('Server-Timing: ' . $headerString, false);
+        header('X-Max-Memory-Usage: ' . $memoryUsage, false);
+        return null;
+    }
+
+    private function humanReadableFileSize(int $size): string
+    {
+        $fileSizeNames = [" Bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB"];
+        $i = floor(log($size, 1024));
+        return $size ? round($size / (1024 ** $i), 2) . $fileSizeNames[$i] : '0 Bytes';
     }
 
     /**
@@ -130,9 +176,11 @@ final class TimingUtility
             if (!isset($elementsByKey[$stopWatch->key])) {
                 $elementsByKey[$stopWatch->key] = [];
             }
+
             $elementsByKey[$stopWatch->key][] = $stopWatch;
         }
-        $keepStopWatches = new \SplObjectStorage();
+
+        $keepStopWatches = new SplObjectStorage();
 
         $insertBefore = [];
         foreach ($elementsByKey as $key => $stopWatches) {
@@ -141,14 +189,14 @@ final class TimingUtility
                 foreach ($stopWatches as $stopWatch) {
                     $keepStopWatches->attach($stopWatch);
                 }
+
                 continue;
             }
+
             $first = $stopWatches[0];
             $sum = array_sum(
                 array_map(
-                    static function (StopWatch $stopWatch) {
-                        return $stopWatch->getDuration();
-                    },
+                    static fn(StopWatch $stopWatch): float => $stopWatch->getDuration(),
                     $stopWatches
                 )
             );
@@ -156,26 +204,28 @@ final class TimingUtility
             $insertBefore[$key]->startTime = $first->startTime;
             $insertBefore[$key]->stopTime = $insertBefore[$key]->startTime + $sum;
 
-            usort($stopWatches, static function (StopWatch $a, StopWatch $b) {
-                return $b->getDuration() <=> $a->getDuration();
-            });
+            usort($stopWatches, static fn(StopWatch $a, StopWatch $b): int => $b->getDuration() <=> $a->getDuration());
 
             $biggestStopWatches = array_slice($stopWatches, 0, 3);
             foreach ($biggestStopWatches as $stopWatch) {
                 $keepStopWatches->attach($stopWatch);
             }
         }
+
         $result = [];
         foreach ($initalStopWatches as $stopWatch) {
             if (isset($insertBefore[$stopWatch->key])) {
                 $result[] = $insertBefore[$stopWatch->key];
                 unset($insertBefore[$stopWatch->key]);
             }
+
             if (!$keepStopWatches->contains($stopWatch)) {
                 continue;
             }
+
             $result[] = $stopWatch;
         }
+
         return $result;
     }
 
@@ -188,13 +238,19 @@ final class TimingUtility
 
     public function isActive(): bool
     {
-        if (self::$isCli) {
+        if ($this->alreadyShutdown) {
             return false;
         }
-        if (self::$isBackendUser === false && Environment::getContext()->isProduction()) {
+
+        if (self::IS_CLI) {
             return false;
         }
-        return true;
+
+        if (self::$isBackendUser !== false) {
+            return true;
+        }
+
+        return !Environment::getContext()->isProduction();
     }
 
     /**

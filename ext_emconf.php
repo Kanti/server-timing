@@ -1,5 +1,7 @@
 <?php
 
+use Composer\InstalledVersions;
+
 /** @var string $_EXTKEY */
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Kanti: server-timing',
@@ -12,10 +14,10 @@ $EM_CONF[$_EXTKEY] = [
     'uploadfolder' => '0',
     'createDirs' => '',
     'clearCacheOnLoad' => 0,
-    'version' => \Composer\InstalledVersions::getPrettyVersion('kanti/server-timing'),
+    'version' => InstalledVersions::getPrettyVersion('kanti/server-timing'),
     'constraints' => [
         'depends' => [
-            'typo3' => '10.0.0-12.1.999',
+            'typo3' => '11.0.0-12.1.999',
         ],
         'conflicts' => [],
         'suggests' => [],

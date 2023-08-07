@@ -14,14 +14,13 @@ use TYPO3\CMS\Adminpanel\Utility\StateUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class AdminpanelSqlLoggingMiddleware implements MiddlewareInterface
+/**
+ * @deprecated can be removed if only TYPO3 >=12 is compatible
+ */
+final class AdminpanelSqlLoggingMiddleware implements MiddlewareInterface
 {
     /**
      * Enable SQL Logging as early as possible to catch all queries if the admin panel is active
-     *
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -39,6 +38,7 @@ class AdminpanelSqlLoggingMiddleware implements MiddlewareInterface
                 )
             );
         }
+
         return $handler->handle($request);
     }
 }

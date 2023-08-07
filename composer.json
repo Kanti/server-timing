@@ -1,63 +1,58 @@
 {
-  "name" : "kanti/server-timing",
-  "description" : "Show timings of Database and HTTP Calls",
-  "type" : "typo3-cms-extension",
-  "minimum-stability" : "stable",
-  "license" : "GPL-2.0-or-later",
-  "authors" : [
+  "name": "kanti/server-timing",
+  "description": "Show timings of Database and HTTP Calls (send them to Sentry)",
+  "license": "GPL-2.0-or-later",
+  "type": "typo3-cms-extension",
+  "authors": [
     {
-      "name" : "Matthias Vogel",
-      "email" : "git@kanti.de"
+      "name": "Matthias Vogel",
+      "email": "git@kanti.de"
     }
   ],
-  "autoload" : {
-    "psr-4" : {
-      "Kanti\\ServerTiming\\" : "Classes/"
+  "require": {
+    "php": "~8.1.0 || ~8.2.0",
+    "composer-runtime-api": "^2.0.0",
+    "typo3/cms-core": "^11.0 || ^12.0",
+    "typo3/cms-extbase": "^11.0 || ^12.0"
+  },
+  "require-dev": {
+    "infection/infection": "^0.26.13",
+    "phpstan/extension-installer": "^1.1",
+    "phpunit/phpunit": "^10",
+    "pluswerk/grumphp-config": "^6.7",
+    "saschaegerer/phpstan-typo3": "^1.1",
+    "ssch/typo3-rector": "^1.1.3",
+    "typo3/cms-adminpanel": "^11.0 || ^12.0"
+  },
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "Kanti\\ServerTiming\\": "Classes/"
     }
   },
-  "autoload-dev" : {
-    "psr-4" : {
-      "Kanti\\ServerTiming\\Tests\\" : "Tests/"
+  "autoload-dev": {
+    "psr-4": {
+      "Kanti\\ServerTiming\\Tests\\": "Tests/"
     }
   },
-  "extra" : {
-    "typo3/cms" : {
-      "extension-key" : "server_timing"
-    },
-    "pluswerk/grumphp-config" : {
-      "auto-setting": false
-    },
-    "grumphp" : {
-      "config-default-path" : "grumphp.yml"
-    }
-  },
-  "config" : {
-    "allow-plugins" : {
+  "config": {
+    "allow-plugins": {
       "typo3/class-alias-loader": true,
       "typo3/cms-composer-installers": true,
       "phpro/grumphp": true,
       "pluswerk/grumphp-config": true,
       "infection/extension-installer": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "ergebnis/composer-normalize": true
     }
   },
-  "scripts" : {
-    "test" : "@php -d pcov.enabled=1 ./vendor/bin/phpunit",
-    "infection" : "infection --only-covered"
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "server_timing"
+    }
   },
-  "require" : {
-    "php" : "~7.4 || ~8.0 || ~8.1 || ~8.2",
-    "typo3/cms-core" : "10.* || 11.* || 12.*",
-    "typo3/cms-extbase" : "10.* || 11.* || 12.*",
-    "ocramius/package-versions": "^2.1",
-    "composer-runtime-api": "^2.0.0"
-  },
-  "require-dev" : {
-    "pluswerk/grumphp-config" : "^4.0 || ^5.0",
-    "typo3/cms-adminpanel" : "10.* || 11.* || 12.*",
-    "phpunit/phpunit" : "^9.5",
-    "infection/infection" : "^0.18.2 || ^0.26.13",
-    "saschaegerer/phpstan-typo3": "^1.1",
-    "phpstan/extension-installer": "^1.1"
+  "scripts": {
+    "infection": "infection --only-covered",
+    "test": "@php -d pcov.enabled=1 ./vendor/bin/phpunit"
   }
 }

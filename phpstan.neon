@@ -1,11 +1,10 @@
+includes:
+  - phpstan-baseline.neon
+  - vendor/andersundsehr/phpstan-git-files/extension.php
+
 parameters:
-  level: max
-  paths:
-    - Classes/
-    - Tests/
-  excludePaths:
-    - Classes/XClass/ExtbaseDispatcherLegacy.php
-    - Classes/XClass/ExtbaseDispatcherV11.php
+  level: 8
+  reportUnmatchedIgnoredErrors: false
   typo3:
       requestGetAttributeMapping:
           server-timing:middleware:inward: Kanti\ServerTiming\Dto\StopWatch|null

@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @coversDefaultClass \Kanti\ServerTiming\Utility\TimingUtility
  */
-class TimingUtilityTest extends TestCase
+final class TimingUtilityTest extends TestCase
 {
     /**
      * @test
@@ -76,6 +76,7 @@ class TimingUtilityTest extends TestCase
         $reflection = new \ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('timingString');
         $reflectionMethod->setAccessible(true);
+
         $result = $reflectionMethod->invoke(new TimingUtility(), ...$args);
         self::assertEquals($expected, $result);
     }
@@ -112,11 +113,10 @@ class TimingUtilityTest extends TestCase
     public function combineIfToMuch(array $expected, array $initalStopWatches): void
     {
         $reflection = new \ReflectionClass(TimingUtility::class);
-        $initalStopWatches = array_map(static function (StopWatch $el) {
-            return clone $el;
-        }, $initalStopWatches);
+        $initalStopWatches = array_map(static fn(StopWatch $el): StopWatch => clone $el, $initalStopWatches);
         $reflectionMethod = $reflection->getMethod('combineIfToMuch');
         $reflectionMethod->setAccessible(true);
+
         $result = $reflectionMethod->invoke(new TimingUtility(), $initalStopWatches);
         self::assertEqualsWithDelta($expected, $result, 0.00001);
     }

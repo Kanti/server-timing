@@ -9,19 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.4', '8.0', '8.1', '8.2' ]
-        typo3: [ '10', '11', '12' ]
-        exclude:
-          - php: '8.0'
-            typo3: '10'
-          - php: '8.1'
-            typo3: '10'
-          - php: '8.2'
-            typo3: '10'
-          - php: '7.4'
-            typo3: '12'
-          - php: '8.0'
-            typo3: '12'
+        php: [ '8.1', '8.2' ]
+        typo3: [ '11', '12' ]
     steps:
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
