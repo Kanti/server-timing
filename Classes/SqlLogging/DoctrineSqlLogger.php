@@ -13,6 +13,10 @@ final class DoctrineSqlLogger
 
     public function startQuery(string $sql): void
     {
+        if ($sql === 'SELECT DATABASE()') {
+            return;
+        }
+
         $this->stopWatch?->stopIfNot();
         $this->stopWatch = TimingUtility::stopWatch('sql', $sql);
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Utility;
 
+use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Pluswerk\Sentry\Service\Sentry;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,6 +12,7 @@ use Sentry\ClientBuilder;
 use Sentry\SentrySdk;
 use Sentry\Tracing\Span;
 use Sentry\Tracing\SpanContext;
+use Sentry\Tracing\SpanStatus;
 use Sentry\Tracing\TransactionContext;
 
 final class SentryUtility
@@ -18,7 +20,7 @@ final class SentryUtility
     /**
      * @param StopWatch[] $stopWatches
      */
-    public function sendSentryTrace(ServerRequestInterface $request, array $stopWatches): void
+    public function sendSentryTrace(ScriptResult $result, array $stopWatches): void
     {
         if (!class_exists(SentrySdk::class)) {
             return;
@@ -60,16 +62,12 @@ final class SentryUtility
         $hub->bindClient($client);
 
         $transactionContext = new TransactionContext();
-        $transactionContext->setName($request->getMethod() . ' ' . $request->getUri());
-        $transactionContext->setOp('typo3.request');
-        $transactionContext->setData([
-            'request.method' => $request->getMethod(),
-            'request.query' => $request->getQueryParams(),
-            'request.body' => $request->getParsedBody(),
-            'request.headers' => $request->getHeaders(),
-            'request.cookies' => $request->getCookieParams(),
-            'request.url' => (string)$request->getUri(),
-        ]);
+        if ($result->isCli()) {
+            $this->setContextFromCli($transactionContext, $result);
+        } else {
+            $this->setContextFromRequest($transactionContext, $result);
+        }
+
         $transactionContext->setStartTimestamp($stopWatches[0]->startTime);
 
         $transaction = $hub->startTransaction($transactionContext);
@@ -93,6 +91,37 @@ final class SentryUtility
             $stack[] = $span;
         }
 
+        $hub->setSpan($transaction);
+
         $transaction->finish($stopWatches[0]->stopTime);
+    }
+
+    private function setContextFromRequest(TransactionContext $transactionContext, ScriptResult $result): void
+    {
+        $serverRequest = $result->request;
+        assert($serverRequest instanceof ServerRequestInterface);
+        $transactionContext->setName($serverRequest->getMethod() . ' ' . $serverRequest->getUri());
+        $transactionContext->setOp('typo3.request');
+        $transactionContext->setData([
+            'request.method' => $serverRequest->getMethod(),
+            'request.query' => $serverRequest->getQueryParams(),
+            'request.body' => $serverRequest->getParsedBody(),
+            'request.headers' => $serverRequest->getHeaders(),
+            'request.cookies' => $serverRequest->getCookieParams(),
+            'request.url' => (string)$serverRequest->getUri(),
+        ]);
+        $statusCode = $result->response?->getStatusCode() ?? http_response_code();
+        if (is_int($statusCode)) {
+            $transactionContext->setStatus(SpanStatus::createFromHttpStatusCode($statusCode));
+        }
+    }
+
+    private function setContextFromCli(TransactionContext $transactionContext, ScriptResult $result): void
+    {
+        $transactionContext->setName(implode(' ', $_SERVER['argv']));
+        $transactionContext->setOp('typo3.cli');
+        if ($result->cliExitCode !== null) {
+            $transactionContext->setStatus($result->cliExitCode ? SpanStatus::unknownError() : SpanStatus::ok());
+        }
     }
 }

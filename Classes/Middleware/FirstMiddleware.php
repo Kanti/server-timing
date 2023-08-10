@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\Middleware;
 
 use Doctrine\DBAL\Logging\SQLLogger;
+use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -39,7 +40,7 @@ final class FirstMiddleware implements MiddlewareInterface
         self::$stopWatchOutward?->stopIfNot();
         self::$stopWatchOutward = null;
 
-        return TimingUtility::getInstance()->shutdown($request, $response);
+        return TimingUtility::getInstance()->shutdown(ScriptResult::fromRequest($request, $response)) ?? $response;
     }
 
     /**
@@ -59,9 +60,10 @@ final class FirstMiddleware implements MiddlewareInterface
 
                 public function startQuery($sql, ?array $params = null, ?array $types = null): void
                 {
-                    $stop = $this->stopWatch;
-                    if ($stop instanceof StopWatch) {
-                        $stop();
+                    $this->stopWatch?->stopIfNot();
+
+                    if ($sql === 'SELECT DATABASE()') {
+                        return;
                     }
 
                     $this->stopWatch = TimingUtility::stopWatch('sql', $sql);
@@ -69,11 +71,8 @@ final class FirstMiddleware implements MiddlewareInterface
 
                 public function stopQuery(): void
                 {
-                    $stop = $this->stopWatch;
-                    if ($stop instanceof StopWatch) {
-                        $stop();
-                        $this->stopWatch = null;
-                    }
+                    $this->stopWatch?->stopIfNot();
+                    $this->stopWatch = null;
                 }
             }
         );

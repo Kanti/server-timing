@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\Utility;
 
 use Exception;
+use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,17 +20,14 @@ final class TimingUtility
 
     private static bool $registered = false;
 
-    private static ?bool $isBackendUser = null;
-
-    /**
-     * @var bool
-     */
-    private const IS_CLI = PHP_SAPI === 'cli';
+    /** @var bool */
+    public const IS_CLI = PHP_SAPI === 'cli';
 
     private bool $alreadyShutdown = false;
 
     public static function getInstance(): TimingUtility
     {
+        // to not use GeneralUtility::makeInstance( as this is maybe called to early in the stack)
         return self::$instance ??= new self();
     }
 
@@ -46,7 +44,7 @@ final class TimingUtility
 
     public function startInternal(string $key, string $info = ''): void
     {
-        if (!$this->isActive()) {
+        if (!$this->shouldTrack()) {
             return;
         }
 
@@ -65,7 +63,7 @@ final class TimingUtility
 
     public function endInternal(string $key): void
     {
-        if (!$this->isActive()) {
+        if (!$this->shouldTrack()) {
             return;
         }
 
@@ -87,18 +85,20 @@ final class TimingUtility
     {
         $stopWatch = new StopWatch($key, $info);
 
-        if ($this->isActive()) {
+        if ($this->shouldTrack()) {
             if (!count($this->order)) {
                 $phpStopWatch = new StopWatch('php', '');
                 $phpStopWatch->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
                 $this->order[] = $phpStopWatch;
             }
 
+
+            // TODO limit to x watches
             $this->order[] = $stopWatch;
 
             if (!self::$registered) {
                 register_shutdown_function(static function (): void {
-                    self::getInstance()->shutdown();
+                    self::getInstance()->shutdown(ScriptResult::fromShutdown());
                 });
                 self::$registered = true;
             }
@@ -107,29 +107,24 @@ final class TimingUtility
         return $stopWatch;
     }
 
-    /**
-     * if called with Response object than it will add the Server-Timing header to that response and return it.
-     * if called without it will set the header with the header() function. (called from shutdown function)
-     * @template T of ResponseInterface|null
-     * @param T|null $response
-     * @return (T is ResponseInterface ? ResponseInterface : null)
-     */
-    public function shutdown(?ServerRequestInterface $request = null, ?ResponseInterface $response = null): ?ResponseInterface
+    public function shutdown(ScriptResult $result): ?ResponseInterface
     {
-        if (!$this->isActive()) {
-            return $response;
+        if (!$this->shouldTrack()) {
+            return $result->response;
         }
 
         $this->alreadyShutdown = true;
 
 
         foreach (array_reverse($this->order) as $stopWatch) {
-            if ($stopWatch->stopTime === null) {
-                $stopWatch->stop();
-            }
+            $stopWatch->stopIfNot();
         }
 
-        GeneralUtility::makeInstance(SentryUtility::class)->sendSentryTrace($request ?? $GLOBALS['TYPO3_REQUEST'], $this->order);
+        GeneralUtility::makeInstance(SentryUtility::class)->sendSentryTrace($result, $this->order);
+
+        if (!$this->shouldAddHeader()) {
+            return $result->response;
+        }
 
         $timings = [];
         foreach ($this->combineIfToMuch($this->order) as $index => $time) {
@@ -143,12 +138,12 @@ final class TimingUtility
 
         $headerString = implode(',', $timings);
         if (!$timings) {
-            return $response;
+            return $result->response;
         }
 
         $memoryUsage = $this->humanReadableFileSize(memory_get_peak_usage());
-        if ($response) {
-            return $response
+        if ($result->response) {
+            return $result->response
                 ->withAddedHeader('Server-Timing', $headerString)
                 ->withAddedHeader('X-Max-Memory-Usage', $memoryUsage);
         }
@@ -236,31 +231,26 @@ final class TimingUtility
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
     }
 
-    public function isActive(): bool
+    public function shouldAddHeader(): bool
     {
-        if ($this->alreadyShutdown) {
-            return false;
-        }
-
         if (self::IS_CLI) {
             return false;
         }
 
-        if (self::$isBackendUser !== false) {
+        if ($this->isBackendUser()) {
             return true;
         }
 
         return !Environment::getContext()->isProduction();
     }
 
-    /**
-     * @internal
-     */
-    public function checkBackendUserStatus(): void
+    public function shouldTrack(): bool
     {
-        self::$isBackendUser = (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
-        if (!$this->isActive()) {
-            self::$instance = null;
-        }
+        return !$this->alreadyShutdown;
+    }
+
+    private function isBackendUser(): bool
+    {
+        return (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
     }
 }

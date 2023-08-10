@@ -15,7 +15,6 @@ final class LastMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        TimingUtility::getInstance()->checkBackendUserStatus();
         $stopWatch = $request->getAttribute('server-timing:middleware:inward');
         $stopWatch?->stop();
 

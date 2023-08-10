@@ -75,13 +75,12 @@ final class TimingUtilityTest extends TestCase
     {
         $reflection = new \ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('timingString');
-        $reflectionMethod->setAccessible(true);
 
         $result = $reflectionMethod->invoke(new TimingUtility(), ...$args);
         self::assertEquals($expected, $result);
     }
 
-    public function dataProviderTimingString(): \Generator
+    public static function dataProviderTimingString(): \Generator
     {
         yield 'simple' => [
             '000;desc="key";dur=12210.00',
@@ -115,13 +114,12 @@ final class TimingUtilityTest extends TestCase
         $reflection = new \ReflectionClass(TimingUtility::class);
         $initalStopWatches = array_map(static fn(StopWatch $el): StopWatch => clone $el, $initalStopWatches);
         $reflectionMethod = $reflection->getMethod('combineIfToMuch');
-        $reflectionMethod->setAccessible(true);
 
         $result = $reflectionMethod->invoke(new TimingUtility(), $initalStopWatches);
         self::assertEqualsWithDelta($expected, $result, 0.00001);
     }
 
-    public function dataProviderCombineIfToMuch(): \Generator
+    public static function dataProviderCombineIfToMuch(): \Generator
     {
         $stopWatchX = new StopWatch('x', 'info');
         $stopWatchX->startTime = 100001.0001;
@@ -189,50 +187,19 @@ final class TimingUtilityTest extends TestCase
 
     /**
      * @test
-     * @covers ::isActive
+     * @covers ::shouldTrack
      */
-    public function isActive(): void
+    public function shouldTrack(): void
     {
         $reflection = new \ReflectionClass(TimingUtility::class);
-        $isCli = $reflection->getProperty('isCli');
-        $isCli->setAccessible(true);
-
-        $isBackendUser = $reflection->getProperty('isBackendUser');
-        $isBackendUser->setAccessible(true);
+        $isAlreadyShutdown = $reflection->getProperty('alreadyShutdown');
 
         $timingUtility = new TimingUtility();
 
-        $isCli->setValue(false);
-        $isBackendUser->setValue(true);
-        self::assertTrue($timingUtility->isActive());
+        $isAlreadyShutdown->setValue($timingUtility, false);
+        self::assertTrue($timingUtility->shouldTrack());
 
-        $isCli->setValue(true);
-        $isBackendUser->setValue(true);
-        self::assertFalse($timingUtility->isActive());
-
-        $isCli->setValue(true);
-        $isBackendUser->setValue(false);
-        self::assertFalse($timingUtility->isActive());
-
-        $isCli->setValue(true);
-        $isBackendUser->setValue(null);
-        self::assertFalse($timingUtility->isActive());
-    }
-
-    /**
-     * @test
-     * @covers ::getInstance
-     * @covers ::resetInstance
-     */
-    public function getInstance(): void
-    {
-        $firstInstance = TimingUtility::getInstance();
-        self::assertSame($firstInstance, TimingUtility::getInstance());
-
-        $reflection = new \ReflectionClass(TimingUtility::class);
-        $resetInstance = $reflection->getMethod('resetInstance');
-        $resetInstance->setAccessible(true);
-        $resetInstance->invoke(null);
-        self::assertNotSame($firstInstance, TimingUtility::getInstance());
+        $isAlreadyShutdown->setValue($timingUtility, true);
+        self::assertFalse($timingUtility->shouldTrack());
     }
 }

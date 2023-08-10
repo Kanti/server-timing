@@ -6,14 +6,9 @@ namespace Kanti\ServerTiming\XClass;
 
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Extbase\Event\Mvc\AfterRequestDispatchedEvent;
 use TYPO3\CMS\Extbase\Mvc\Dispatcher;
 use TYPO3\CMS\Extbase\Mvc\Request;
 use TYPO3\CMS\Extbase\Mvc\RequestInterface;
-
-use function class_alias;
 
 final class ExtbaseDispatcher extends Dispatcher
 {
