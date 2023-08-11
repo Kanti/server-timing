@@ -6,7 +6,7 @@ services:
 
   Kanti\ServerTiming\:
     resource: '../Classes/*'
-    exclude: '../Classes/Domain/Model/*'
+    exclude: '../Classes/SqlLogging/*'
 
   Kanti\ServerTiming\EventListener\ConsoleCommandEventListener:
     tags:

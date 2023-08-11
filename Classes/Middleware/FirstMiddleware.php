@@ -48,10 +48,6 @@ final class FirstMiddleware implements MiddlewareInterface
      */
     private function registerSqlLogger(): void
     {
-        if (version_compare((new Typo3Version())->getBranch(), '12.0', '>=')) {
-            return;
-        }
-
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
         $connection = $connectionPool->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
         $connection->getConfiguration()->setSQLLogger(

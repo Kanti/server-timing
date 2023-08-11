@@ -26,22 +26,6 @@ final class SentryUtility
             return;
         }
 
-        if (!class_exists(ClientBuilder::class)) {
-            return;
-        }
-
-        if (!class_exists(TransactionContext::class)) {
-            return;
-        }
-
-        if (!class_exists(SpanContext::class)) {
-            return;
-        }
-
-        if (!class_exists(Span::class)) {
-            return;
-        }
-
         $hub = SentrySdk::getCurrentHub();
         $client = $hub->getClient();
         if (!$client && class_exists(Sentry::class)) {
