@@ -2,11 +2,12 @@ services:
   _defaults:
     autowire: true
     autoconfigure: true
-    public: false
+    public: true
 
   Kanti\ServerTiming\:
     resource: '../Classes/*'
-    exclude: '../Classes/SqlLogging/*'
+    # SqlLogging can be removed from exclude if only TYPO3 12 and above are required
+    exclude: '../Classes/{Dto,SqlLogging}/*'
 
   Kanti\ServerTiming\EventListener\ConsoleCommandEventListener:
     tags:

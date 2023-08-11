@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\Tests;
 
 use Generator;
+use Kanti\ServerTiming\Service\ConfigService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,6 +16,7 @@ use ReflectionClass;
 
 #[CoversClass(TimingUtility::class)]
 #[CoversClass(StopWatch::class)]
+#[CoversClass(ConfigService::class)]
 final class TimingUtilityTest extends TestCase
 {
     protected function setUp(): void

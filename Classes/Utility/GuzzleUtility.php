@@ -13,8 +13,8 @@ final class GuzzleUtility
 {
     public static function getHandler(): ?Closure
     {
-        if (ServerRequestFactory::fromGlobals()->getUri()->getPath() === '/typo3/module/system/config') {
-            // fix bug in Configuration module
+        if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/typo3/module/system/config')) {
+            // fix bug in Configuration Backend module
             return null;
         }
 

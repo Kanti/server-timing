@@ -8,6 +8,8 @@ use Closure;
 use Exception;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
+use Kanti\ServerTiming\Service\SentryService;
+use Kanti\ServerTiming\Service\ConfigService;
 use Psr\Http\Message\ResponseInterface;
 use SplObjectStorage;
 use TYPO3\CMS\Core\Context\Context;
@@ -27,9 +29,12 @@ final class TimingUtility
 
     private readonly Closure $registerShutdownFunction;
 
-    public function __construct(Closure $registerShutdownFunction = null)
+    private readonly ConfigService $configService;
+
+    public function __construct(Closure $registerShutdownFunction = null, ConfigService $configService = null)
     {
         $this->registerShutdownFunction = $registerShutdownFunction ?? register_shutdown_function(...);
+        $this->configService = $configService ?? new ConfigService();
     }
 
     public static function getInstance(Closure $registerShutdownFunction = null): TimingUtility
@@ -105,8 +110,9 @@ final class TimingUtility
                 $this->order[] = $phpStopWatch;
             }
 
-            // TODO limit to x watches
-            $this->order[] = $stopWatch;
+            if (count($this->order) < $this->configService->stopWatchLimit()) {
+                $this->order[] = $stopWatch;
+            }
 
             if (!$this->registered) {
                 $x = $this->registerShutdownFunction;
@@ -131,7 +137,7 @@ final class TimingUtility
             $stopWatch->stopIfNot();
         }
 
-        GeneralUtility::makeInstance(SentryUtility::class)->sendSentryTrace($result, $this->order);
+        GeneralUtility::makeInstance(SentryService::class)->sendSentryTrace($result, $this->order);
 
         if (!$this->shouldAddHeader()) {
             return $result->response;

@@ -2,21 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Kanti\ServerTiming\Utility;
+namespace Kanti\ServerTiming\Service;
 
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Pluswerk\Sentry\Service\Sentry;
 use Psr\Http\Message\ServerRequestInterface;
-use Sentry\ClientBuilder;
 use Sentry\SentrySdk;
 use Sentry\Tracing\Span;
 use Sentry\Tracing\SpanContext;
 use Sentry\Tracing\SpanStatus;
 use Sentry\Tracing\TransactionContext;
 
-final class SentryUtility
+final class SentryService
 {
+    public function __construct(private readonly ConfigService $configService)
+    {
+    }
+
     /**
      * @param StopWatch[] $stopWatches
      */
@@ -38,12 +41,8 @@ final class SentryUtility
 
         $options = $client->getOptions();
 
-        $options->setProfilesSampleRate(1.0); // TODO do not hard code!!!
-        $options->setTracesSampleRate(1.0); // TODO do not hard code!!!
-        $options->setEnableTracing(true); // TODO do not hard code!!!
-
-        $client = (new ClientBuilder($options))->getClient();
-        $hub->bindClient($client);
+        $options->setTracesSampleRate($this->configService->tracesSampleRate() ?? $options->getTracesSampleRate());
+        $options->setEnableTracing($this->configService->enableTracing() ?? $options->getEnableTracing());
 
         $transactionContext = new TransactionContext();
         if ($result->isCli()) {
@@ -77,7 +76,10 @@ final class SentryUtility
 
         $hub->setSpan($transaction);
 
+        $should = $options->shouldAttachStacktrace();
+        $options->setAttachStacktrace(false);
         $transaction->finish($stopWatches[0]->stopTime);
+        $options->setAttachStacktrace($should);
     }
 
     private function setContextFromRequest(TransactionContext $transactionContext, ScriptResult $result): void
