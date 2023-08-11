@@ -9,6 +9,10 @@ use Doctrine\DBAL\Driver\Middleware\AbstractConnectionMiddleware;
 use Doctrine\DBAL\Driver\Result;
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
 
+if (!class_exists(AbstractConnectionMiddleware::class)) {
+    return;
+}
+
 final class LoggingConnection extends AbstractConnectionMiddleware
 {
     public function __construct(ConnectionInterface $connection, private readonly DoctrineSqlLogger $logger)

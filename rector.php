@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use Rector\PHPUnit\Set\PHPUnitLevelSetList;
 use PLUS\GrumPHPConfig\RectorSettings;
 use Rector\Config\RectorConfig;
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
+use Rector\PHPUnit\Set\PHPUnitSetList;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->parallel();
@@ -22,6 +24,13 @@ return static function (RectorConfig $rectorConfig): void {
         [
             ...RectorSettings::sets(true),
             ...RectorSettings::setsTypo3(false),
+            PHPUnitLevelSetList::UP_TO_PHPUNIT_100,
+            PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
+            PHPUnitSetList::PHPUNIT_CODE_QUALITY,
+            PHPUnitSetList::PHPUNIT_YIELD_DATA_PROVIDER,
+            PHPUnitSetList::PHPUNIT_EXCEPTION,
+            PHPUnitSetList::PHPUNIT_SPECIFIC_METHOD,
+            PHPUnitSetList::REMOVE_MOCKS,
         ]
     );
 

@@ -23,7 +23,7 @@ final class DoctrineSqlLogger
 
     public function stopQuery(): void
     {
-        $this->stopWatch?->stop();
+        $this->stopWatch?->stopIfNot();
         $this->stopWatch = null;
     }
 }

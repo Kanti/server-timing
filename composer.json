@@ -57,7 +57,7 @@
   },
   "scripts": {
     "infection": "infection --only-covered",
-    "test": "@php -d pcov.enabled=1 ./vendor/bin/phpunit",
+    "test": "@php -d pcov.enabled=1 ./vendor/bin/phpunit --display-warnings",
     "test:watch": [
       "Composer\\Config::disableProcessTimeout",
       "@php -d pcov.enabled=1 ./vendor/bin/phpunit-watcher watch < /dev/tty"

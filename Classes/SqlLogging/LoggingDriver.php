@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\SqlLogging;
 
 use Doctrine\DBAL\Driver as DriverInterface;
+use Doctrine\DBAL\Driver\Middleware\AbstractConnectionMiddleware;
 use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
+
+if (!class_exists(AbstractDriverMiddleware::class)) {
+    return;
+}
 
 final class LoggingDriver extends AbstractDriverMiddleware
 {

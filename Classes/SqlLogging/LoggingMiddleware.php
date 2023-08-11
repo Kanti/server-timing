@@ -6,8 +6,13 @@ namespace Kanti\ServerTiming\SqlLogging;
 
 use Doctrine\DBAL\Driver as DriverInterface;
 use Doctrine\DBAL\Driver\Middleware as MiddlewareInterface;
+use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 
-final class LoggingMiddleWare implements MiddlewareInterface
+if (!interface_exists(MiddlewareInterface::class)) {
+    return;
+}
+
+final class LoggingMiddleware implements MiddlewareInterface
 {
     public function wrap(DriverInterface $driver): DriverInterface
     {

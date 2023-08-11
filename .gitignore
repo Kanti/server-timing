@@ -1,6 +1,5 @@
-.phpunit.cache
 composer.lock
 public/
 vendor/
-.phpunit.result.cache
 var
+Resources/Public/test-result

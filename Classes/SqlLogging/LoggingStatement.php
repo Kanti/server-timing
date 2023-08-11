@@ -8,6 +8,10 @@ use Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 
+if (!class_exists(AbstractStatementMiddleware::class)) {
+    return;
+}
+
 final class LoggingStatement extends AbstractStatementMiddleware
 {
     public function __construct(StatementInterface $statement, private readonly DoctrineSqlLogger $logger, private readonly string $sql)

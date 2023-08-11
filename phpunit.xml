@@ -16,8 +16,8 @@
   </testsuites>
   <coverage>
     <report>
-      <html outputDirectory="var/test-result/"/>
-      <clover outputFile="var/test-result/clover.xml"/>
+      <html outputDirectory="Resources/Public/test-result/"/>
+      <clover outputFile="Resources/Public/test-result/clover.xml"/>
     </report>
   </coverage>
   <source>
