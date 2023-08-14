@@ -9,6 +9,9 @@ services:
     # SqlLogging can be removed from exclude if only TYPO3 12 and above are required
     exclude: '../Classes/{Dto,SqlLogging}/*'
 
+  Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface:
+    class: Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction
+
   Kanti\ServerTiming\EventListener\ConsoleCommandEventListener:
     tags:
       -

@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Utility;
 
-use Closure;
 use Exception;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
+use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
 use Kanti\ServerTiming\Service\SentryService;
 use Kanti\ServerTiming\Service\ConfigService;
 use Psr\Http\Message\ResponseInterface;
 use SplObjectStorage;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class TimingUtility
+final class TimingUtility implements SingletonInterface
 {
-    private static ?TimingUtility $instance = null;
-
     private bool $registered = false;
 
     /** @var bool */
@@ -27,20 +26,13 @@ final class TimingUtility
 
     private bool $alreadyShutdown = false;
 
-    private readonly Closure $registerShutdownFunction;
-
-    private readonly ConfigService $configService;
-
-    public function __construct(Closure $registerShutdownFunction = null, ConfigService $configService = null)
+    public function __construct(private readonly RegisterShutdownFunctionInterface $registerShutdownFunction, private readonly ConfigService $configService)
     {
-        $this->registerShutdownFunction = $registerShutdownFunction ?? register_shutdown_function(...);
-        $this->configService = $configService ?? new ConfigService();
     }
 
-    public static function getInstance(Closure $registerShutdownFunction = null): TimingUtility
+    public static function getInstance(): TimingUtility
     {
-        // to not use GeneralUtility::makeInstance( as this is maybe called to early in the stack)
-        return self::$instance ??= new self($registerShutdownFunction);
+        return GeneralUtility::makeInstance(TimingUtility::class);
     }
 
     /** @var StopWatch[] */
@@ -115,8 +107,7 @@ final class TimingUtility
             }
 
             if (!$this->registered) {
-                $x = $this->registerShutdownFunction;
-                $x(fn(): ?ResponseInterface => $this->shutdown(ScriptResult::fromShutdown()));
+                $this->registerShutdownFunction->register(fn(): ?ResponseInterface => $this->shutdown(ScriptResult::fromShutdown()));
                 $this->registered = true;
             }
         }

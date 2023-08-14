@@ -20,7 +20,7 @@
     "infection/infection": "^0.26.13",
     "phpstan/extension-installer": "^1.1",
     "phpunit/phpunit": "^10",
-    "pluswerk/grumphp-config": "^6.7",
+    "pluswerk/grumphp-config": "^6.8.0",
     "saschaegerer/phpstan-typo3": "^1.1",
     "sentry/sdk": "^3.5",
     "spatie/phpunit-watcher": "^1.23",

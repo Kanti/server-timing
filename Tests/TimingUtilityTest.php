@@ -6,6 +6,7 @@ namespace Kanti\ServerTiming\Tests;
 
 use Generator;
 use Kanti\ServerTiming\Service\ConfigService;
+use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionNoop;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,16 +14,23 @@ use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 #[CoversClass(TimingUtility::class)]
 #[CoversClass(StopWatch::class)]
 #[CoversClass(ConfigService::class)]
+#[CoversClass(RegisterShutdownFunctionNoop::class)]
 final class TimingUtilityTest extends TestCase
 {
     protected function setUp(): void
     {
-        // do not register a real shutdown function:
-        TimingUtility::getInstance(static fn(): int => 0);
+        GeneralUtility::setSingletonInstance(TimingUtility::class, $this->getTestInstance());
+    }
+
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']);
+        GeneralUtility::resetSingletonInstances([]);
     }
 
     #[Test]
@@ -75,14 +83,14 @@ final class TimingUtilityTest extends TestCase
     #[Test]
     public function stopWatchInternal(): void
     {
-        (new TimingUtility(static fn(): int => 0))->stopWatchInternal('test');
+        TimingUtility::getInstance()->stopWatchInternal('test');
         self::assertTrue(true, 'isCallable');
     }
 
     #[Test]
     public function stopWatchFirstIsAlwaysPhp(): void
     {
-        $timingUtility = new TimingUtility(static fn(): int => 0);
+        $timingUtility = $this->getTestInstance();
         $timingUtility->stopWatchInternal('test');
 
         $watches = $timingUtility->getStopWatches();
@@ -92,18 +100,30 @@ final class TimingUtilityTest extends TestCase
     }
 
     #[Test]
+    public function stopWatchLimit(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['stop_watch_limit'] = 3;
+        $timingUtility = $this->getTestInstance();
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+
+        $watches = $timingUtility->getStopWatches();
+        self::assertCount(3, $watches);
+        self::assertSame('php', $watches[0]->key);
+        self::assertSame('test', $watches[1]->key);
+        self::assertSame('test', $watches[2]->key);
+    }
+
+    #[Test]
     public function didRegisterShutdownFunctionOnce(): void
     {
-        $called = 0;
-        $timingUtility = new TimingUtility(static function ($callback) use (&$called): void {
-            self::assertIsCallable($callback);
-            $called++;
-        });
+        $timingUtility = new TimingUtility($registerShutdownFunction = new RegisterShutdownFunctionNoop(), new ConfigService());
         $timingUtility->stopWatchInternal('test');
         $timingUtility->stopWatchInternal('test');
         $timingUtility->stopWatchInternal('test');
         $timingUtility->stopWatchInternal('test');
-        self::assertSame(1, $called);
+        self::assertSame(1, $registerShutdownFunction->callCount);
     }
 
     #[Test]
@@ -127,7 +147,7 @@ final class TimingUtilityTest extends TestCase
         $reflection = new ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('timingString');
 
-        $result = $reflectionMethod->invoke(new TimingUtility(static fn(): int => 0), ...$args);
+        $result = $reflectionMethod->invoke($this->getTestInstance(), ...$args);
         self::assertSame($expected, $result);
     }
 
@@ -163,7 +183,7 @@ final class TimingUtilityTest extends TestCase
         $initalStopWatches = array_map(static fn(StopWatch $el): StopWatch => clone $el, $initalStopWatches);
         $reflectionMethod = $reflection->getMethod('combineIfToMuch');
 
-        $result = $reflectionMethod->invoke(new TimingUtility(static fn(): int => 0), $initalStopWatches);
+        $result = $reflectionMethod->invoke($this->getTestInstance(), $initalStopWatches);
         self::assertEqualsWithDelta($expected, $result, 0.00001);
     }
 
@@ -239,12 +259,17 @@ final class TimingUtilityTest extends TestCase
         $reflection = new ReflectionClass(TimingUtility::class);
         $isAlreadyShutdown = $reflection->getProperty('alreadyShutdown');
 
-        $timingUtility = new TimingUtility(static fn(): int => 0);
+        $timingUtility = $this->getTestInstance();
 
         $isAlreadyShutdown->setValue($timingUtility, false);
         self::assertTrue($timingUtility->shouldTrack());
 
         $isAlreadyShutdown->setValue($timingUtility, true);
         self::assertFalse($timingUtility->shouldTrack());
+    }
+
+    private function getTestInstance(): TimingUtility
+    {
+        return new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
     }
 }
