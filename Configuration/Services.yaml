@@ -24,3 +24,16 @@ services:
         identifier: kanti/server-timing/console-terminate-event-listener
         event: Symfony\Component\Console\Event\ConsoleTerminateEvent
         method: stop
+
+  Kanti\ServerTiming\EventListener\MailEventListener:
+    tags:
+      -
+        name: event.listener
+        identifier: kanti/server-timing/mail-event-listener
+        event: TYPO3\CMS\Core\Mail\Event\BeforeMailerSentMessageEvent
+        method: start
+      -
+        name: event.listener
+        identifier: kanti/server-timing/mail-event-listener
+        event: TYPO3\CMS\Core\Mail\Event\AfterMailerSentMessageEvent
+        method: stop
