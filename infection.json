@@ -9,10 +9,10 @@
     "configDir": "."
   },
   "logs": {
-    "text": "var/infection.log",
-    "html": "var/infection.html"
+    "text": "Resources/Public/test-result/infection.log",
+    "html": "Resources/Public/test-result/infection.html"
   },
-  "minCoveredMsi": 88,
+  "minCoveredMsi": 99,
   "initialTestsPhpOptions": "-d pcov.enabled=1",
   "mutators": {
     "@default": true

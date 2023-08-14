@@ -11,20 +11,22 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class LastMiddleware implements MiddlewareInterface
+final class LastMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        TimingUtility::getInstance()->checkBackendUserStatus();
-        $stop = $request->getAttribute('server-timing:middleware:inward');
-        if ($stop instanceof StopWatch) {
-            $stop();
-        }
+        $stopWatch = $request->getAttribute('server-timing:middleware:inward');
+        $stopWatch?->stop();
+
         $request = $request->withoutAttribute('server-timing:middleware:inward');
-        $stop = TimingUtility::stopWatch('requestHandler');
-        $response = $handler->handle($request);
-        $stop();
-        \Kanti\ServerTiming\Middleware\FirstMiddleware::$stopWatchOutward = TimingUtility::stopWatch('middleware', 'Outward');
+        $stopWatch = TimingUtility::stopWatch('requestHandler');
+        try {
+            $response = $handler->handle($request);
+        } finally {
+            $stopWatch();
+            FirstMiddleware::$stopWatchOutward = TimingUtility::stopWatch('middleware', 'Outward');
+        }
+
         return $response;
     }
 }

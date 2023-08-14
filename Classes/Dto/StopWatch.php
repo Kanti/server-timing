@@ -6,30 +6,33 @@ namespace Kanti\ServerTiming\Dto;
 
 final class StopWatch
 {
-    /** @var string */
-    public $key = '';
-    /** @var string */
-    public $info = '';
-    /** @var ?float */
-    public $startTime;
-    /** @var ?float */
-    public $stopTime;
+    public float $startTime;
 
-    public function __construct(string $key, string $info)
+    public ?float $stopTime = null;
+
+    public function __construct(public string $key, public string $info)
     {
-        $this->key = $key;
-        $this->info = $info;
         $this->startTime = microtime(true);
     }
 
     public function getDuration(): float
     {
-        $this->stopTime = $this->stopTime ?? microtime(true);
+        $this->stopTime ??= microtime(true);
         return $this->stopTime - $this->startTime;
+    }
+
+    public function stop(): void
+    {
+        $this->stopTime = microtime(true);
     }
 
     public function __invoke(): void
     {
-        $this->stopTime = microtime(true);
+        $this->stop();
+    }
+
+    public function stopIfNot(): void
+    {
+        $this->stopTime ??= microtime(true);
     }
 }

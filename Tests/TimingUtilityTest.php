@@ -4,23 +4,43 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Tests;
 
+use Generator;
+use Kanti\ServerTiming\Service\ConfigService;
+use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionNoop;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-/**
- * @coversDefaultClass \Kanti\ServerTiming\Utility\TimingUtility
- */
-class TimingUtilityTest extends TestCase
+#[CoversClass(TimingUtility::class)]
+#[CoversClass(StopWatch::class)]
+#[CoversClass(ConfigService::class)]
+#[CoversClass(RegisterShutdownFunctionNoop::class)]
+final class TimingUtilityTest extends TestCase
 {
-    /**
-     * @test
-     * @covers ::getInstance
-     * @covers ::stopWatch
-     * @covers ::stopWatchInternal
-     * @covers ::isActive
-     * @covers \Kanti\ServerTiming\Dto\StopWatch
-     */
+    protected function setUp(): void
+    {
+        GeneralUtility::setSingletonInstance(TimingUtility::class, $this->getTestInstance());
+    }
+
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']);
+        GeneralUtility::resetSingletonInstances([]);
+    }
+
+    #[Test]
+    public function getInstance(): void
+    {
+        self::assertInstanceOf(TimingUtility::class, $firstCall = TimingUtility::getInstance());
+        self::assertSame($firstCall, TimingUtility::getInstance());
+    }
+
+    #[Test]
     public function stopWatch(): void
     {
         $stopWatch = TimingUtility::stopWatch('testStopWatch');
@@ -34,26 +54,79 @@ class TimingUtilityTest extends TestCase
         self::assertLessThan(1, $stopWatch->getDuration());
     }
 
-    /**
-     * @test
-     * @covers ::stopWatchInternal
-     * @covers ::isActive
-     * @covers \Kanti\ServerTiming\Dto\StopWatch
-     */
+    #[Test]
+    public function stopWatchStop(): void
+    {
+        $stopWatch = TimingUtility::stopWatch('testStopWatch');
+        self::assertNull($stopWatch->stopTime);
+        $stopWatch->stop();
+        $stopTime = $stopWatch->stopTime;
+        self::assertIsFloat($stopTime);
+        self::assertIsFloat($stopWatch->getDuration());
+        self::assertSame($stopTime, $stopWatch->stopTime);
+        self::assertGreaterThan(0.0, $stopWatch->getDuration());
+        self::assertLessThan(1.0, $stopWatch->getDuration());
+    }
+
+    #[Test]
+    public function stopWatchStopIfNot(): void
+    {
+        $stopWatch = TimingUtility::stopWatch('testStopWatch');
+        self::assertNull($stopWatch->stopTime);
+        $stopWatch->stopIfNot();
+        self::assertGreaterThan(0.0, $stopWatch->stopTime);
+        $stopWatch->stopTime = 0.0;
+        $stopWatch->stopIfNot();
+        self::assertSame(0.0, $stopWatch->stopTime);
+    }
+
+    #[Test]
     public function stopWatchInternal(): void
     {
-        (new TimingUtility())->stopWatchInternal('test');
+        TimingUtility::getInstance()->stopWatchInternal('test');
         self::assertTrue(true, 'isCallable');
     }
 
-    /**
-     * @test
-     * @covers ::getInstance
-     * @covers ::stopWatch
-     * @covers ::stopWatchInternal
-     * @covers ::isActive
-     * @covers \Kanti\ServerTiming\Dto\StopWatch
-     */
+    #[Test]
+    public function stopWatchFirstIsAlwaysPhp(): void
+    {
+        $timingUtility = $this->getTestInstance();
+        $timingUtility->stopWatchInternal('test');
+
+        $watches = $timingUtility->getStopWatches();
+        self::assertCount(2, $watches);
+        self::assertSame('php', $watches[0]->key);
+        self::assertSame('test', $watches[1]->key);
+    }
+
+    #[Test]
+    public function stopWatchLimit(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['stop_watch_limit'] = 3;
+        $timingUtility = $this->getTestInstance();
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+
+        $watches = $timingUtility->getStopWatches();
+        self::assertCount(3, $watches);
+        self::assertSame('php', $watches[0]->key);
+        self::assertSame('test', $watches[1]->key);
+        self::assertSame('test', $watches[2]->key);
+    }
+
+    #[Test]
+    public function didRegisterShutdownFunctionOnce(): void
+    {
+        $timingUtility = new TimingUtility($registerShutdownFunction = new RegisterShutdownFunctionNoop(), new ConfigService());
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+        $timingUtility->stopWatchInternal('test');
+        self::assertSame(1, $registerShutdownFunction->callCount);
+    }
+
+    #[Test]
     public function stopWatchGetDuration(): void
     {
         $stopWatch = TimingUtility::stopWatch('testStopWatch');
@@ -65,22 +138,20 @@ class TimingUtilityTest extends TestCase
     }
 
     /**
-     * @test
-     * @covers ::timingString
-     * @dataProvider dataProviderTimingString
-     *
      * @param array{0:int, 1:string, 2:float} $args
      */
+    #[Test]
+    #[DataProvider('dataProviderTimingString')]
     public function timingString(string $expected, array $args): void
     {
-        $reflection = new \ReflectionClass(TimingUtility::class);
+        $reflection = new ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('timingString');
-        $reflectionMethod->setAccessible(true);
-        $result = $reflectionMethod->invoke(new TimingUtility(), ...$args);
-        self::assertEquals($expected, $result);
+
+        $result = $reflectionMethod->invoke($this->getTestInstance(), ...$args);
+        self::assertSame($expected, $result);
     }
 
-    public function dataProviderTimingString(): \Generator
+    public static function dataProviderTimingString(): Generator
     {
         yield 'simple' => [
             '000;desc="key";dur=12210.00',
@@ -101,27 +172,22 @@ class TimingUtilityTest extends TestCase
     }
 
     /**
-     * @test
-     * @covers ::combineIfToMuch
-     * @covers       \Kanti\ServerTiming\Dto\StopWatch
-     * @dataProvider dataProviderCombineIfToMuch
-     *
      * @param StopWatch[] $expected
      * @param StopWatch[] $initalStopWatches
      */
+    #[Test]
+    #[DataProvider('dataProviderCombineIfToMuch')]
     public function combineIfToMuch(array $expected, array $initalStopWatches): void
     {
-        $reflection = new \ReflectionClass(TimingUtility::class);
-        $initalStopWatches = array_map(static function (StopWatch $el) {
-            return clone $el;
-        }, $initalStopWatches);
+        $reflection = new ReflectionClass(TimingUtility::class);
+        $initalStopWatches = array_map(static fn(StopWatch $el): StopWatch => clone $el, $initalStopWatches);
         $reflectionMethod = $reflection->getMethod('combineIfToMuch');
-        $reflectionMethod->setAccessible(true);
-        $result = $reflectionMethod->invoke(new TimingUtility(), $initalStopWatches);
+
+        $result = $reflectionMethod->invoke($this->getTestInstance(), $initalStopWatches);
         self::assertEqualsWithDelta($expected, $result, 0.00001);
     }
 
-    public function dataProviderCombineIfToMuch(): \Generator
+    public static function dataProviderCombineIfToMuch(): Generator
     {
         $stopWatchX = new StopWatch('x', 'info');
         $stopWatchX->startTime = 100001.0001;
@@ -187,52 +253,23 @@ class TimingUtilityTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     * @covers ::isActive
-     */
-    public function isActive(): void
+    #[Test]
+    public function shouldTrack(): void
     {
-        $reflection = new \ReflectionClass(TimingUtility::class);
-        $isCli = $reflection->getProperty('isCli');
-        $isCli->setAccessible(true);
+        $reflection = new ReflectionClass(TimingUtility::class);
+        $isAlreadyShutdown = $reflection->getProperty('alreadyShutdown');
 
-        $isBackendUser = $reflection->getProperty('isBackendUser');
-        $isBackendUser->setAccessible(true);
+        $timingUtility = $this->getTestInstance();
 
-        $timingUtility = new TimingUtility();
+        $isAlreadyShutdown->setValue($timingUtility, false);
+        self::assertTrue($timingUtility->shouldTrack());
 
-        $isCli->setValue(false);
-        $isBackendUser->setValue(true);
-        self::assertTrue($timingUtility->isActive());
-
-        $isCli->setValue(true);
-        $isBackendUser->setValue(true);
-        self::assertFalse($timingUtility->isActive());
-
-        $isCli->setValue(true);
-        $isBackendUser->setValue(false);
-        self::assertFalse($timingUtility->isActive());
-
-        $isCli->setValue(true);
-        $isBackendUser->setValue(null);
-        self::assertFalse($timingUtility->isActive());
+        $isAlreadyShutdown->setValue($timingUtility, true);
+        self::assertFalse($timingUtility->shouldTrack());
     }
 
-    /**
-     * @test
-     * @covers ::getInstance
-     * @covers ::resetInstance
-     */
-    public function getInstance(): void
+    private function getTestInstance(): TimingUtility
     {
-        $firstInstance = TimingUtility::getInstance();
-        self::assertSame($firstInstance, TimingUtility::getInstance());
-
-        $reflection = new \ReflectionClass(TimingUtility::class);
-        $resetInstance = $reflection->getMethod('resetInstance');
-        $resetInstance->setAccessible(true);
-        $resetInstance->invoke(null);
-        self::assertNotSame($firstInstance, TimingUtility::getInstance());
+        return new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
     }
 }

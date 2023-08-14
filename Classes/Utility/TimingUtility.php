@@ -4,40 +4,48 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Utility;
 
+use Exception;
+use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
+use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
+use Kanti\ServerTiming\Service\SentryService;
+use Kanti\ServerTiming\Service\ConfigService;
+use Psr\Http\Message\ResponseInterface;
+use SplObjectStorage;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class TimingUtility
+final class TimingUtility implements SingletonInterface
 {
-    /** @var TimingUtility|null */
-    private static $instance = null;
+    private bool $registered = false;
+
     /** @var bool */
-    private static $registered = false;
-    /** @var bool|null */
-    private static $isBackendUser = null;
-    /** @var bool */
-    private static $isCli = PHP_SAPI === 'cli';
+    public const IS_CLI = PHP_SAPI === 'cli';
+
+    private bool $alreadyShutdown = false;
+
+    public function __construct(private readonly RegisterShutdownFunctionInterface $registerShutdownFunction, private readonly ConfigService $configService)
+    {
+    }
 
     public static function getInstance(): TimingUtility
     {
-        return self::$instance = self::$instance ?? new self();
-    }
-
-    /**
-     * only for tests
-     * @phpstan-ignore-next-line
-     */
-    private static function resetInstance(): void
-    {
-        self::$instance = null;
+        return GeneralUtility::makeInstance(TimingUtility::class);
     }
 
     /** @var StopWatch[] */
-    private $order = [];
+    private array $order = [];
+
     /** @var array<string, StopWatch> */
-    private $stopWatchStack = [];
+    private array $stopWatchStack = [];
+
+    /** @return StopWatch[] */
+    public function getStopWatches(): array
+    {
+        return $this->order;
+    }
 
     public static function start(string $key, string $info = ''): void
     {
@@ -46,13 +54,15 @@ final class TimingUtility
 
     public function startInternal(string $key, string $info = ''): void
     {
-        if (!$this->isActive()) {
+        if (!$this->shouldTrack()) {
             return;
         }
+
         $stop = $this->stopWatchInternal($key, $info);
         if (isset($this->stopWatchStack[$key])) {
-            throw new \Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
+            throw new Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
         }
+
         $this->stopWatchStack[$key] = $stop;
     }
 
@@ -63,12 +73,14 @@ final class TimingUtility
 
     public function endInternal(string $key): void
     {
-        if (!$this->isActive()) {
+        if (!$this->shouldTrack()) {
             return;
         }
+
         if (!isset($this->stopWatchStack[$key])) {
-            throw new \Exception('where is no measurement with this key');
+            throw new Exception('where is no measurement with this key');
         }
+
         $stop = $this->stopWatchStack[$key];
         $stop();
         unset($this->stopWatchStack[$key]);
@@ -83,40 +95,77 @@ final class TimingUtility
     {
         $stopWatch = new StopWatch($key, $info);
 
-        if ($this->isActive()) {
+        if ($this->shouldTrack()) {
             if (!count($this->order)) {
                 $phpStopWatch = new StopWatch('php', '');
                 $phpStopWatch->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
                 $this->order[] = $phpStopWatch;
             }
-            $this->order[] = $stopWatch;
 
-            if (!self::$registered) {
-                register_shutdown_function(static function () {
-                    self::getInstance()->shutdown();
-                });
-                self::$registered = true;
+            if (count($this->order) < $this->configService->stopWatchLimit()) {
+                $this->order[] = $stopWatch;
+            }
+
+            if (!$this->registered) {
+                $this->registerShutdownFunction->register(fn(): ?ResponseInterface => $this->shutdown(ScriptResult::fromShutdown()));
+                $this->registered = true;
             }
         }
 
         return $stopWatch;
     }
 
-    private function shutdown(): void
+    public function shutdown(ScriptResult $result): ?ResponseInterface
     {
-        if (!$this->isActive()) {
-            return;
+        if (!$this->shouldTrack()) {
+            return $result->response;
         }
+
+        $this->alreadyShutdown = true;
+
+
+        foreach (array_reverse($this->order) as $stopWatch) {
+            $stopWatch->stopIfNot();
+        }
+
+        GeneralUtility::makeInstance(SentryService::class)->sendSentryTrace($result, $this->order);
+
+        if (!$this->shouldAddHeader()) {
+            return $result->response;
+        }
+
         $timings = [];
         foreach ($this->combineIfToMuch($this->order) as $index => $time) {
             $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info), $time->getDuration());
         }
+
         if (count($timings) > 70) {
             $timings = [$this->timingString(0, 'To Many measurements ' . count($timings), 0.000001)];
         }
-        if ($timings) {
-            header(sprintf('Server-Timing: %s', implode(',', $timings)), false);
+
+
+        $headerString = implode(',', $timings);
+        if (!$timings) {
+            return $result->response;
         }
+
+        $memoryUsage = $this->humanReadableFileSize(memory_get_peak_usage());
+        if ($result->response) {
+            return $result->response
+                ->withAddedHeader('Server-Timing', $headerString)
+                ->withAddedHeader('X-Max-Memory-Usage', $memoryUsage);
+        }
+
+        header('Server-Timing: ' . $headerString, false);
+        header('X-Max-Memory-Usage: ' . $memoryUsage, false);
+        return null;
+    }
+
+    private function humanReadableFileSize(int $size): string
+    {
+        $fileSizeNames = [" Bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB"];
+        $i = floor(log($size, 1024));
+        return $size ? round($size / (1024 ** $i), 2) . $fileSizeNames[$i] : '0 Bytes';
     }
 
     /**
@@ -130,9 +179,11 @@ final class TimingUtility
             if (!isset($elementsByKey[$stopWatch->key])) {
                 $elementsByKey[$stopWatch->key] = [];
             }
+
             $elementsByKey[$stopWatch->key][] = $stopWatch;
         }
-        $keepStopWatches = new \SplObjectStorage();
+
+        $keepStopWatches = new SplObjectStorage();
 
         $insertBefore = [];
         foreach ($elementsByKey as $key => $stopWatches) {
@@ -141,14 +192,14 @@ final class TimingUtility
                 foreach ($stopWatches as $stopWatch) {
                     $keepStopWatches->attach($stopWatch);
                 }
+
                 continue;
             }
+
             $first = $stopWatches[0];
             $sum = array_sum(
                 array_map(
-                    static function (StopWatch $stopWatch) {
-                        return $stopWatch->getDuration();
-                    },
+                    static fn(StopWatch $stopWatch): float => $stopWatch->getDuration(),
                     $stopWatches
                 )
             );
@@ -156,26 +207,28 @@ final class TimingUtility
             $insertBefore[$key]->startTime = $first->startTime;
             $insertBefore[$key]->stopTime = $insertBefore[$key]->startTime + $sum;
 
-            usort($stopWatches, static function (StopWatch $a, StopWatch $b) {
-                return $b->getDuration() <=> $a->getDuration();
-            });
+            usort($stopWatches, static fn(StopWatch $a, StopWatch $b): int => $b->getDuration() <=> $a->getDuration());
 
             $biggestStopWatches = array_slice($stopWatches, 0, 3);
             foreach ($biggestStopWatches as $stopWatch) {
                 $keepStopWatches->attach($stopWatch);
             }
         }
+
         $result = [];
         foreach ($initalStopWatches as $stopWatch) {
             if (isset($insertBefore[$stopWatch->key])) {
                 $result[] = $insertBefore[$stopWatch->key];
                 unset($insertBefore[$stopWatch->key]);
             }
+
             if (!$keepStopWatches->contains($stopWatch)) {
                 continue;
             }
+
             $result[] = $stopWatch;
         }
+
         return $result;
     }
 
@@ -186,25 +239,26 @@ final class TimingUtility
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
     }
 
-    public function isActive(): bool
+    public function shouldAddHeader(): bool
     {
-        if (self::$isCli) {
+        if (self::IS_CLI) {
             return false;
         }
-        if (self::$isBackendUser === false && Environment::getContext()->isProduction()) {
-            return false;
+
+        if ($this->isBackendUser()) {
+            return true;
         }
-        return true;
+
+        return !Environment::getContext()->isProduction();
     }
 
-    /**
-     * @internal
-     */
-    public function checkBackendUserStatus(): void
+    public function shouldTrack(): bool
     {
-        self::$isBackendUser = (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
-        if (!$this->isActive()) {
-            self::$instance = null;
-        }
+        return !$this->alreadyShutdown;
+    }
+
+    private function isBackendUser(): bool
+    {
+        return (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
     }
 }

@@ -27,7 +27,7 @@ at the moment there is nothing to configure
 
 ````php
 
-  $stop = \Kanti\ServerTiming\Utility\TimingUtility::stopWatch('doSomething', 'additinal Information');
+  $stop = \Kanti\ServerTiming\Utility\TimingUtility::stopWatch('doSomething', 'additional Information');
   $result = $this->doSomethingExpensive();
   $stop();
 
@@ -39,7 +39,7 @@ at the moment there is nothing to configure
 
 ````php
 
-  \Kanti\ServerTiming\Utility\TimingUtility::start('doSomething', 'additinal Information');
+  \Kanti\ServerTiming\Utility\TimingUtility::start('doSomething', 'additional Information');
   $result = $this->doSomethingExpensive();
   \Kanti\ServerTiming\Utility\TimingUtility::end('doSomething');
 

@@ -1,16 +1,19 @@
 <?php
 
+use Kanti\ServerTiming\Middleware\FirstMiddleware;
+use Kanti\ServerTiming\Middleware\LastMiddleware;
+
 return [
     'frontend' => [
         'server-timing/first' => [
-            'target' => \Kanti\ServerTiming\Middleware\FirstMiddleware::class,
+            'target' => FirstMiddleware::class,
             'before' => [
                 'staticfilecache/fallback',
                 'typo3/cms-frontend/timetracker',
             ],
         ],
         'server-timing/last' => [
-            'target' => \Kanti\ServerTiming\Middleware\LastMiddleware::class,
+            'target' => LastMiddleware::class,
             'after' => [
                 'solr/service/pageexporter',
                 'typo3/cms-frontend/output-compression',
@@ -23,14 +26,14 @@ return [
     ],
     'backend' => [
         'server-timing/first' => [
-            'target' => \Kanti\ServerTiming\Middleware\FirstMiddleware::class,
+            'target' => FirstMiddleware::class,
             'before' => [
                 'typo3/cms-core/normalized-params-attribute',
                 'typo3/cms-backend/locked-backend',
             ],
         ],
         'server-timing/last' => [
-            'target' => \Kanti\ServerTiming\Middleware\LastMiddleware::class,
+            'target' => LastMiddleware::class,
             'after' => [
                 'typo3/cms-frontend/output-compression',
                 'typo3/cms-backend/response-headers',

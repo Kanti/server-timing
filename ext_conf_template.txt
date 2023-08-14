@@ -1,0 +1,8 @@
+# cat=sentry; type=integer; label=StopWatch Limit
+stop_watch_limit = 100000
+
+# cat=sentry; type=string; label=Sentry Sample Rate between 0.0 and 1.0 (empty: keep default)
+sentry_sample_rate =
+
+# cat=sentry; type=string; label=Sentry CLI Sample Rate between 0.0 and 1.0 (empty: keep default)
+sentry_cli_sample_rate =

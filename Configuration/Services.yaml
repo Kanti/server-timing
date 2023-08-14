@@ -1,0 +1,26 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  Kanti\ServerTiming\:
+    resource: '../Classes/*'
+    # SqlLogging can be removed from exclude if only TYPO3 12 and above are required
+    exclude: '../Classes/{Dto,SqlLogging}/*'
+
+  Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface:
+    class: Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction
+
+  Kanti\ServerTiming\EventListener\ConsoleCommandEventListener:
+    tags:
+      -
+        name: event.listener
+        identifier: kanti/server-timing/console-command-event-listener
+        event: Symfony\Component\Console\Event\ConsoleCommandEvent
+        method: start
+      -
+        name: event.listener
+        identifier: kanti/server-timing/console-terminate-event-listener
+        event: Symfony\Component\Console\Event\ConsoleTerminateEvent
+        method: stop

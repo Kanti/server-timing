@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         cacheResultFile=".phpunit.cache/test-results"
          executionOrder="depends,defects"
-         forceCoversAnnotation="true"
-         beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         convertDeprecationsToExceptions="true"
          failOnRisky="true"
          failOnWarning="true"
-         verbose="true">
+         cacheDirectory="var/.phpunit.cache"
+         requireCoverageMetadata="true"
+         beStrictAboutCoverageMetadata="true">
   <testsuites>
     <testsuite name="default">
       <directory>Tests</directory>
     </testsuite>
   </testsuites>
-
-  <coverage cacheDirectory=".phpunit.cache/code-coverage"
-            processUncoveredFiles="true">
+  <coverage>
+    <report>
+      <html outputDirectory="Resources/Public/test-result/"/>
+      <clover outputFile="Resources/Public/test-result/clover.xml"/>
+    </report>
+  </coverage>
+  <source>
     <include>
       <directory suffix=".php">Classes</directory>
     </include>
-    <report>
-      <html outputDirectory="var/test-result/"/>
-      <clover outputFile="var/test-result/clover.xml"/>
-    </report>
-  </coverage>
+  </source>
 </phpunit>
