@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload EXT:server_timing to TER
         run: |
-          sed -i 's/\\Composer\\InstalledVersions::getPrettyVersion('\''kanti\/server-timing'\'')/'\''${{ steps.get_version.outputs.VERSION }}'\''/g' ext_emconf.php \
+          sed -i 's/InstalledVersions::getPrettyVersion('\''kanti\/server-timing'\'')/'\''${{ steps.get_version.outputs.VERSION }}'\''/g' ext_emconf.php \
           && git config --global user.email "no@one" \
           && git config --global user.name "No One" \
           && git add ext_emconf.php \
