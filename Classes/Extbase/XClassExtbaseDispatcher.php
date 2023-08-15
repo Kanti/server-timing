@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kanti\ServerTiming\XClass;
+namespace Kanti\ServerTiming\Extbase;
 
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Psr\Http\Message\ResponseInterface;
@@ -10,7 +10,7 @@ use TYPO3\CMS\Extbase\Mvc\Dispatcher;
 use TYPO3\CMS\Extbase\Mvc\Request;
 use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 
-final class ExtbaseDispatcher extends Dispatcher
+final class XClassExtbaseDispatcher extends Dispatcher
 {
     public function dispatch(RequestInterface $request): ResponseInterface
     {
