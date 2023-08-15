@@ -4,3 +4,18 @@ parameters:
 			message: "#^Parameter \\#1 \\$loggers of class Doctrine\\\\DBAL\\\\Logging\\\\LoggerChain constructor expects iterable\\<Doctrine\\\\DBAL\\\\Logging\\\\SQLLogger\\>, array\\<int, Doctrine\\\\DBAL\\\\Logging\\\\SQLLogger\\|TYPO3\\\\CMS\\\\Adminpanel\\\\Log\\\\DoctrineSqlLogger\\> given\\.$#"
 			count: 1
 			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: "#^Call to method getMessage\\(\\) on an unknown class TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\BeforeMailerSentMessageEvent\\.$#"
+			count: 1
+			path: Classes/EventListener/MailEventListener.php
+
+		-
+			message: "#^Parameter \\$event of method Kanti\\\\ServerTiming\\\\EventListener\\\\MailEventListener\\:\\:start\\(\\) has invalid type TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\BeforeMailerSentMessageEvent\\.$#"
+			count: 1
+			path: Classes/EventListener/MailEventListener.php
+
+		-
+			message: "#^Parameter \\$event of method Kanti\\\\ServerTiming\\\\EventListener\\\\MailEventListener\\:\\:stop\\(\\) has invalid type TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\AfterMailerSentMessageEvent\\.$#"
+			count: 1
+			path: Classes/EventListener/MailEventListener.php
