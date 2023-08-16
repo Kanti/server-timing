@@ -33,6 +33,7 @@ if you have sentry enabled (different Extension eg. `pluswerk/sentry` or `networ
 - `sentry_cli_sample_rate`
     - just like `sentry_sample_rate` but this setting is for the cli calls of the `typo3` binary
 - `stop_watch_limit` is set for long-running processes, if you get memory problems you can lower this setting. (default: 100_000)
+- you can force the profiling of Requests by adding the Cookie `XDEBUG_PROFILE` with any value.
 
 ## Measure your own timings:
 
