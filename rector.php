@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\PHPUnit\Set\PHPUnitLevelSetList;
 use PLUS\GrumPHPConfig\RectorSettings;
 use Rector\Config\RectorConfig;
@@ -40,6 +41,8 @@ return static function (RectorConfig $rectorConfig): void {
         [
             ...RectorSettings::skip(),
             ...RectorSettings::skipTypo3(),
+
+            MakeInheritedMethodVisibilitySameAsParentRector::class
 
             /**
              * rector should not touch these files

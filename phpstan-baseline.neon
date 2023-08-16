@@ -19,3 +19,28 @@ parameters:
 			message: "#^Parameter \\$event of method Kanti\\\\ServerTiming\\\\EventListener\\\\MailEventListener\\:\\:stop\\(\\) has invalid type TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\AfterMailerSentMessageEvent\\.$#"
 			count: 1
 			path: Classes/EventListener/MailEventListener.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Kanti\\\\ServerTiming\\\\Dto\\\\StopWatch\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: Classes/Middleware/WrapMiddleware.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 4 parameters, 3 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 4 parameters, 3 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 3 parameters, 4 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 3 parameters, 4 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php

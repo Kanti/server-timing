@@ -41,8 +41,10 @@ final class SentryService
 
         $options = $client->getOptions();
 
-        $options->setTracesSampleRate($this->configService->tracesSampleRate() ?? $options->getTracesSampleRate());
-        $options->setEnableTracing($this->configService->enableTracing() ?? $options->getEnableTracing());
+        $forceTrace = $this->isForceTrace($result->request);
+
+        $options->setTracesSampleRate((float)($forceTrace ?: $this->configService->tracesSampleRate() ?? $options->getTracesSampleRate()));
+        $options->setEnableTracing($forceTrace ?: $this->configService->enableTracing() ?? $options->getEnableTracing());
 
         $transactionContext = new TransactionContext();
         if ($result->isCli()) {
@@ -109,5 +111,14 @@ final class SentryService
         if ($result->cliExitCode !== null) {
             $transactionContext->setStatus($result->cliExitCode ? SpanStatus::unknownError() : SpanStatus::ok());
         }
+    }
+
+    private function isForceTrace(?ServerRequestInterface $request): bool
+    {
+        if (!$request) {
+            return false;
+        }
+
+        return isset($request->getCookieParams()['XDEBUG_PROFILE']);
     }
 }
