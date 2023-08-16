@@ -13,9 +13,10 @@ at the moment there is nothing to configure
 ## Included measurements:
 
 - `php`: from start of php call to the register shutdown function
-- `middleware`: will show how much time was spend in the **inward** and **outward** middleware directions
+- `middlewareIn`: will show how much time was spend in a middleware to prepare the Request
+- `middlewareOut`: will show how much time was spend in a middleware to change the Response
 - `sql`: shows the sql query's
-- `mail`: shows the mails that are send (only TYPO3 12)
+- `mail`: shows the mails that are send (only TYPO3 >=12)
 - `dataP`: Shows the DataProcessors that were executed
 - `extbase`: show all Extbase dispatches, (forwards are included in the original action call)
 - `guzzle`: external API calls are measured if they use the official TYPO3 `RequestFactory` or the `GuzzleClientFactory`)

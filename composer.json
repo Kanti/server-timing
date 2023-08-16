@@ -52,6 +52,9 @@
   },
   "extra": {
     "typo3/cms": {
+      "Package": {
+        "serviceProvider": "Kanti\\ServerTiming\\ServiceProvider"
+      },
       "extension-key": "server_timing"
     }
   },

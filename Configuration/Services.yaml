@@ -6,9 +6,10 @@ services:
 
   Kanti\ServerTiming\:
     resource: '../Classes/*'
-    # SqlLogging can be removed from exclude if only TYPO3 12 and above are required
-    exclude: '../Classes/{Dto,SqlLogging}/*'
-
+    exclude:
+      - '../Classes/{Dto,SqlLogging}/*'
+      - '../Classes/*/WrapMiddleware.php'
+      - '../Classes/*/XClassMiddlewareDispatcher.php'
   Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface:
     class: Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction
 
@@ -37,3 +38,10 @@ services:
         identifier: kanti/server-timing/mail-event-listener
         event: TYPO3\CMS\Core\Mail\Event\AfterMailerSentMessageEvent
         method: stop
+
+  Kanti\ServerTiming\EventListener\BootCompletedEventListener:
+    tags:
+      -
+        name: event.listener
+        identifier: kanti/server-timing/boot-completed-event-listener
+        event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent

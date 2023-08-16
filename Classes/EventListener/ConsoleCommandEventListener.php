@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\EventListener;
 
 use Kanti\ServerTiming\Dto\ScriptResult;
+use Kanti\ServerTiming\SqlLogging\SqlLoggerCore11;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
