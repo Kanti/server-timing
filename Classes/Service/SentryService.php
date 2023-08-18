@@ -7,12 +7,18 @@ namespace Kanti\ServerTiming\Service;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Pluswerk\Sentry\Service\Sentry;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Sentry\SentrySdk;
 use Sentry\Tracing\Span;
 use Sentry\Tracing\SpanContext;
 use Sentry\Tracing\SpanStatus;
 use Sentry\Tracing\TransactionContext;
+use TYPO3\CMS\Core\Http\HtmlResponse;
+
+use function Sentry\continueTrace;
+use function Sentry\getBaggage;
+use function Sentry\getTraceparent;
 
 final class SentryService
 {
@@ -23,10 +29,10 @@ final class SentryService
     /**
      * @param StopWatch[] $stopWatches
      */
-    public function sendSentryTrace(ScriptResult $result, array $stopWatches): void
+    public function sendSentryTrace(ScriptResult $result, array $stopWatches): ?ResponseInterface
     {
         if (!class_exists(SentrySdk::class)) {
-            return;
+            return $result->response;
         }
 
         $hub = SentrySdk::getCurrentHub();
@@ -36,7 +42,7 @@ final class SentryService
         }
 
         if (!$client) {
-            return;
+            return $result->response;
         }
 
         $options = $client->getOptions();
@@ -46,11 +52,10 @@ final class SentryService
         $options->setTracesSampleRate((float)($forceTrace ?: $this->configService->tracesSampleRate() ?? $options->getTracesSampleRate()));
         $options->setEnableTracing($forceTrace ?: $this->configService->enableTracing() ?? $options->getEnableTracing());
 
-        $transactionContext = new TransactionContext();
         if ($result->isCli()) {
-            $this->setContextFromCli($transactionContext, $result);
+            $transactionContext = $this->createTransactionContextFromCli($result);
         } else {
-            $this->setContextFromRequest($transactionContext, $result);
+            $transactionContext = $this->createTransactionContextFromRequest($result);
         }
 
         $transactionContext->setStartTimestamp($stopWatches[0]->startTime);
@@ -82,12 +87,53 @@ final class SentryService
         $options->setAttachStacktrace(false);
         $transaction->finish($stopWatches[0]->stopTime);
         $options->setAttachStacktrace($should);
+
+        return $this->addSentryTraceToResponse($result->response);
     }
 
-    private function setContextFromRequest(TransactionContext $transactionContext, ScriptResult $result): void
+    private function addSentryTraceToResponse(?ResponseInterface $response): ?ResponseInterface
+    {
+        if (!$response) {
+            return null;
+        }
+
+        if (!str_starts_with($response->getHeaderLine('Content-Type'), 'text/html')) {
+            return $response;
+        }
+
+        $stream = $response->getBody();
+        $stream->rewind();
+
+        $html = $stream->getContents();
+        $position = stripos($html, '</head>') ?: stripos($html, '<body');
+        if (!$position) {
+            return $response;
+        }
+
+        $sentryMetaTags = sprintf('<meta name="sentry-trace" content="%s"/>', getTraceparent());
+        $sentryMetaTags .= sprintf('<meta name="baggage" content="%s"/>', getBaggage());
+
+        $html = substr($html, 0, $position) . $sentryMetaTags . substr($html, $position);
+
+        return new HtmlResponse($html, $response->getStatusCode(), $response->getHeaders());
+    }
+
+    private function createTransactionContextFromRequest(ScriptResult $result): TransactionContext
     {
         $serverRequest = $result->request;
         assert($serverRequest instanceof ServerRequestInterface);
+
+        $sentryTrace = $serverRequest->getHeaderLine('sentry-trace');
+        $baggage = $serverRequest->getHeaderLine('baggage');
+
+        // todo fix "A root transaction is missing. Transactions linked by a dashed line have been orphaned and cannot be directly linked to the root."
+        // todo add sentry-trace and baggage header in guzzle client.
+        if ($sentryTrace) {
+            $transactionContext = continueTrace($sentryTrace, $baggage);
+        } else {
+            $transactionContext = new TransactionContext();
+        }
+
         $transactionContext->setName($serverRequest->getMethod() . ' ' . $serverRequest->getUri());
         $transactionContext->setOp('typo3.request');
         $transactionContext->setData([
@@ -102,15 +148,20 @@ final class SentryService
         if (is_int($statusCode)) {
             $transactionContext->setStatus(SpanStatus::createFromHttpStatusCode($statusCode));
         }
+
+        return $transactionContext;
     }
 
-    private function setContextFromCli(TransactionContext $transactionContext, ScriptResult $result): void
+    private function createTransactionContextFromCli(ScriptResult $result): TransactionContext
     {
+        $transactionContext = new TransactionContext();
         $transactionContext->setName(implode(' ', $_SERVER['argv']));
         $transactionContext->setOp('typo3.cli');
         if ($result->cliExitCode !== null) {
             $transactionContext->setStatus($result->cliExitCode ? SpanStatus::unknownError() : SpanStatus::ok());
         }
+
+        return $transactionContext;
     }
 
     private function isForceTrace(?ServerRequestInterface $request): bool
