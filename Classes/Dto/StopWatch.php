@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Dto;
 
+use Sentry\Tracing\Span;
+
 final class StopWatch
 {
     public float $startTime;
 
     public ?float $stopTime = null;
+
+    public ?Span $span = null;
 
     public function __construct(public string $key, public string $info)
     {
