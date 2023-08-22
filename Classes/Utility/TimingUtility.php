@@ -19,6 +19,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TimingUtility implements SingletonInterface
 {
+    private static ?TimingUtility $instance = null;
+
     private bool $registered = false;
 
     /** @var bool */
@@ -32,7 +34,7 @@ final class TimingUtility implements SingletonInterface
 
     public static function getInstance(): TimingUtility
     {
-        return GeneralUtility::makeInstance(TimingUtility::class);
+        return static::$instance ??= GeneralUtility::makeInstance(TimingUtility::class);
     }
 
     /** @var StopWatch[] */
@@ -128,7 +130,8 @@ final class TimingUtility implements SingletonInterface
             $stopWatch->stopIfNot();
         }
 
-        $response = GeneralUtility::makeInstance(SentryService::class)->sendSentryTrace($result, $this->order);
+        $container = GeneralUtility::getContainer();
+        $response = $container->has(SentryService::class) ? $container->get(SentryService::class)->sendSentryTrace($result, $this->order) : $result->response;
 
         if (!$this->shouldAddHeader()) {
             return $response;
