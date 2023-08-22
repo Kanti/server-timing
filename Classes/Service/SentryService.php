@@ -117,6 +117,10 @@ final class SentryService implements SingletonInterface
             $client = PluswerkSentry::getInstance()->getClient();
         }
 
+        if (!$client) {
+            return null;
+        }
+
         $options = $client->getOptions();
 
         $forceTrace = $this->isTraceForced($serverRequest);
