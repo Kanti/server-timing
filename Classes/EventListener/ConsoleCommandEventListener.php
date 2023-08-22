@@ -14,12 +14,12 @@ final class ConsoleCommandEventListener
 {
     public function start(ConsoleCommandEvent $event): void
     {
-        TimingUtility::start('cli', (string)$event->getCommand()?->getName());
+        TimingUtility::start('console.command', (string)$event->getCommand()?->getName());
     }
 
     public function stop(ConsoleTerminateEvent $event): void
     {
-        TimingUtility::end('cli');
+        TimingUtility::end('console.command');
         TimingUtility::getInstance()->shutdown(ScriptResult::fromCli($event->getExitCode()));
     }
 }

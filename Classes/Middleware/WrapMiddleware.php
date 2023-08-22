@@ -33,9 +33,17 @@ final class WrapMiddleware implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         self::$middlewareIn?->stopIfNot();
-        self::$middlewareIn = TimingUtility::stopWatch($this->isKernel ? 'requestHandler' : 'middlewareIn', $this->info);
+        self::$middlewareIn = TimingUtility::stopWatch($this->isKernel ? 'requestHandler' : 'middleware.in', $this->info);
+
+        if ($this->isKernel) {
+            TimingUtility::end('middleware.in.total');
+        }
 
         $response = $this->requestHandler->handle($request);
+
+        if ($this->isKernel) {
+            TimingUtility::start('middleware.out.total');
+        }
 
         // if it was the requestHandler:
         self::$middlewareIn?->stopIfNot();
@@ -48,7 +56,7 @@ final class WrapMiddleware implements RequestHandlerInterface
         }
 
         if (!$this->isFirst) {
-            self::$middlewareOut = TimingUtility::stopWatch('middlewareOut');
+            self::$middlewareOut = TimingUtility::stopWatch('middleware.out');
         }
 
         return $response;

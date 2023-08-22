@@ -44,3 +44,183 @@ parameters:
 			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 3 parameters, 4 required\\.$#"
 			count: 1
 			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Property Kanti\\\\ServerTiming\\\\Dto\\\\StopWatch\\:\\:\\$span has unknown class Sentry\\\\Tracing\\\\Span as its type\\.$#"
+			count: 1
+			path: Classes/Dto/StopWatch.php
+
+		-
+			message: "#^Call to method finish\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method finish\\(\\) on an unknown class Sentry\\\\Tracing\\\\Transaction\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method getOptions\\(\\) on an unknown class Sentry\\\\ClientInterface\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setData\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setDescription\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setName\\(\\) on an unknown class Sentry\\\\Tracing\\\\TransactionContext\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setOp\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setOp\\(\\) on an unknown class Sentry\\\\Tracing\\\\TransactionContext\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setParentSpanId\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setStartTimestamp\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setStartTimestamp\\(\\) on an unknown class Sentry\\\\Tracing\\\\Transaction\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method setStatus\\(\\) on an unknown class Sentry\\\\Tracing\\\\Transaction\\.$#"
+			count: 2
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to method startChild\\(\\) on an unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to static method createFromHttpStatusCode\\(\\) on an unknown class Sentry\\\\Tracing\\\\SpanStatus\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to static method getCurrentHub\\(\\) on an unknown class Sentry\\\\SentrySdk\\.$#"
+			count: 3
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to static method ok\\(\\) on an unknown class Sentry\\\\Tracing\\\\SpanStatus\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to static method unknownError\\(\\) on an unknown class Sentry\\\\Tracing\\\\SpanStatus\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Class Sentry\\\\Tracing\\\\Span not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Function Sentry\\\\continueTrace not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Function Sentry\\\\getBaggage not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Function Sentry\\\\getTraceparent not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Instantiated class Sentry\\\\Tracing\\\\SpanContext not found\\.$#"
+			count: 2
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Instantiated class Sentry\\\\Tracing\\\\TransactionContext not found\\.$#"
+			count: 2
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:addResultToTransaction\\(\\) has invalid return type Sentry\\\\Tracing\\\\Transaction\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:createTransactionContextFromCli\\(\\) has invalid return type Sentry\\\\Tracing\\\\TransactionContext\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:createTransactionContextFromRequest\\(\\) has invalid return type Sentry\\\\Tracing\\\\TransactionContext\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:getSentryClient\\(\\) has invalid return type Sentry\\\\ClientInterface\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:startTransaction\\(\\) has invalid return type Sentry\\\\Tracing\\\\Transaction\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$stack contains unknown class Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Parameter \\$span of method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:updateSpan\\(\\) has invalid type Sentry\\\\Tracing\\\\Span\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Parameter \\$transaction of method Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:addResultToTransaction\\(\\) has invalid type Sentry\\\\Tracing\\\\Transaction\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Property Kanti\\\\ServerTiming\\\\Service\\\\SentryService\\:\\:\\$transaction has unknown class Sentry\\\\Tracing\\\\Transaction as its type\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Used function Sentry\\\\continueTrace not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Used function Sentry\\\\getBaggage not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Used function Sentry\\\\getTraceparent not found\\.$#"
+			count: 1
+			path: Classes/Service/SentryService.php

@@ -20,27 +20,24 @@ final class SqlLoggerCore11
      */
     public static function registerSqlLogger(): void
     {
+        $doctrineSqlLogger = new DoctrineSqlLogger();
+
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
         $connection = $connectionPool->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
         $connection->getConfiguration()->setSQLLogger(
-            new class implements SQLLogger {
-                private ?StopWatch $stopWatch = null;
+            new class ($doctrineSqlLogger) implements SQLLogger {
+                public function __construct(private readonly DoctrineSqlLogger $doctrineSqlLogger)
+                {
+                }
 
                 public function startQuery($sql, ?array $params = null, ?array $types = null): void
                 {
-                    $this->stopWatch?->stopIfNot();
-
-                    if ($sql === 'SELECT DATABASE()') {
-                        return;
-                    }
-
-                    $this->stopWatch = TimingUtility::stopWatch('sql', $sql);
+                    $this->doctrineSqlLogger->startQuery($sql);
                 }
 
                 public function stopQuery(): void
                 {
-                    $this->stopWatch?->stopIfNot();
-                    $this->stopWatch = null;
+                    $this->doctrineSqlLogger->stopQuery();
                 }
             }
         );

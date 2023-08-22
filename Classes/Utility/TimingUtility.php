@@ -128,10 +128,10 @@ final class TimingUtility implements SingletonInterface
             $stopWatch->stopIfNot();
         }
 
-        GeneralUtility::makeInstance(SentryService::class)->sendSentryTrace($result, $this->order);
+        $response = GeneralUtility::makeInstance(SentryService::class)->sendSentryTrace($result, $this->order);
 
         if (!$this->shouldAddHeader()) {
-            return $result->response;
+            return $response;
         }
 
         $timings = [];
@@ -146,19 +146,19 @@ final class TimingUtility implements SingletonInterface
 
         $headerString = implode(',', $timings);
         if (!$timings) {
-            return $result->response;
+            return $response;
         }
 
         $memoryUsage = $this->humanReadableFileSize(memory_get_peak_usage());
-        if ($result->response) {
-            return $result->response
+        if ($response) {
+            return $response
                 ->withAddedHeader('Server-Timing', $headerString)
                 ->withAddedHeader('X-Max-Memory-Usage', $memoryUsage);
         }
 
         header('Server-Timing: ' . $headerString, false);
         header('X-Max-Memory-Usage: ' . $memoryUsage, false);
-        return null;
+        return $response;
     }
 
     private function humanReadableFileSize(int $size): string

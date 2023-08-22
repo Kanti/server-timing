@@ -31,6 +31,10 @@ final class XClassMiddlewareDispatcher extends MiddlewareDispatcher
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $stop = TimingUtility::stopWatch('bootstrap');
+        $stop->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
+        $stop->stop();
+        TimingUtility::start('middleware.in.total');
         if ($this->tip instanceof WrapMiddleware) {
             $this->tip->isFirst();
         }
@@ -39,6 +43,11 @@ final class XClassMiddlewareDispatcher extends MiddlewareDispatcher
             $response = parent::handle($request);
         } catch (ImmediateResponseException $immediateResponseException) {
             $response = $immediateResponseException->getResponse();
+        }
+
+        try {
+            TimingUtility::end('middleware.out.total');
+        } catch (Exception) {
         }
 
         return TimingUtility::getInstance()->shutdown(ScriptResult::fromRequest($request, $response)) ?? $response;
