@@ -157,7 +157,7 @@ final class SentryService implements SingletonInterface
 
         $html = substr($html, 0, $position) . $sentryMetaTags . substr($html, $position);
 
-        return new HtmlResponse($html, $response->getStatusCode(), $response->getHeaders());
+        return new HtmlResponse($html, $response->getStatusCode(), [...$response->getHeaders(), 'Content-Length' => strlen($html)]);
     }
 
     private function createTransactionContextFromCli(): TransactionContext
