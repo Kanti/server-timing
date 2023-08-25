@@ -25,16 +25,17 @@ at the moment there is nothing to configure
 > if a measurement key has more than 4 entries, they will get combined into one total time with a count.
 > And the 3 longest entries will be kept
 
-## Sentry Profiling
+## Sentry Tracing
 
-if you have sentry enabled (different Extension eg. `pluswerk/sentry` or `networkteam/sentry-client`) than you can activate the profiling.
+if you have sentry enabled (different Extension eg. `pluswerk/sentry` or `networkteam/sentry-client`) than you can activate the tracing.
 - `sentry_sample_rate`
   - if empty ` ` it will keep the setting that was set from the sentry extension.
   - if set to a number like `0.1` it will track 10% of all Requests in sentry.
 - `sentry_cli_sample_rate`
     - just like `sentry_sample_rate` but this setting is for the cli calls of the `typo3` binary
 - `stop_watch_limit` is set for long-running processes, if you get memory problems you can lower this setting. (default: 100_000)
-- you can force the profiling of Requests by adding the Cookie `XDEBUG_PROFILE` with any value.
+- you can force the Tracing of Requests by adding the Cookie `XDEBUG_TRACE` with any value.  
+![Tracing](./Documentation/Tracing.png)
 
 ## Measure your own timings:
 
