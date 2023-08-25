@@ -229,7 +229,7 @@ final class SentryService implements SingletonInterface
             return false;
         }
 
-        return isset($serverRequest->getCookieParams()['XDEBUG_PROFILE']);
+        return isset($serverRequest->getCookieParams()['XDEBUG_TRACE']);
     }
 
     private function startTransaction(): Transaction
