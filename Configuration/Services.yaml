@@ -10,6 +10,7 @@ services:
       - '../Classes/{Dto,SqlLogging}/*'
       - '../Classes/*/WrapMiddleware.php'
       - '../Classes/*/XClassMiddlewareDispatcher.php'
+
   Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface:
     class: Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction
 

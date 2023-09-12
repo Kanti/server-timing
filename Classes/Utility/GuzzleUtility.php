@@ -21,10 +21,15 @@ final class GuzzleUtility
             return null;
         }
 
-        return static fn(callable $handler): Closure => static function (RequestInterface $request, array $options) use ($handler): PromiseInterface {
+        // initialize early: so the spatie/async with staticfilecache doesn't kill the process
+        // there is the problem that it has a subprocess where the Container is not initialized fully
+        $timingUtility = TimingUtility::getInstance();
+        $sentryService = GeneralUtility::makeInstance(SentryService::class);
+
+        return static fn(callable $handler): Closure => static function (RequestInterface $request, array $options) use ($sentryService, $timingUtility, $handler): PromiseInterface {
             $info = $request->getMethod() . ' ' . $request->getUri()->__toString();
-            $stop = TimingUtility::stopWatch('http.client', $info);
-            $request = GeneralUtility::makeInstance(SentryService::class)->addSentryTraceHeaders($request, $stop);
+            $stop = $timingUtility->stopWatchInternal('http.client', $info);
+            $request = $sentryService->addSentryTraceHeaders($request, $stop);
 
             $handlerPromiseCallback = static function ($responseOrException) use ($request, $stop) {
                 $response = null;
