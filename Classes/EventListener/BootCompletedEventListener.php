@@ -14,7 +14,7 @@ final class BootCompletedEventListener
     {
         // we initialize TimingUtility here
         // in the install tool, (eg. DB compare)
-        // at this point, the TimingUtility is found in the container, but at the shutdown state the TimingUtility is not found in the conatiner.
+        // at this point, the TimingUtility is found in the container, but at the shutdown state the TimingUtility is not found in the container.
         // so if we initialize it right here and save it inside a static variable, then everything works as expected. (not the sentry part :/ )
         TimingUtility::getInstance();
         SqlLoggerCore11::registerSqlLogger();
