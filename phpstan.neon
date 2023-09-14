@@ -7,4 +7,4 @@ parameters:
   reportUnmatchedIgnoredErrors: false
   typo3:
       requestGetAttributeMapping:
-          server-timing:middleware:inward: Kanti\ServerTiming\Dto\StopWatch|null
+          middleware.in.total: Kanti\ServerTiming\Dto\StopWatch|null
