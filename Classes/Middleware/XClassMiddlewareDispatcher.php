@@ -34,7 +34,7 @@ final class XClassMiddlewareDispatcher extends MiddlewareDispatcher
         $stop = TimingUtility::stopWatch('bootstrap');
         $stop->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
         $stop->stop();
-        TimingUtility::start('middleware.in.total');
+        $request = $request->withAttribute('middleware.in.total', TimingUtility::stopWatch('middleware.in.total'));
         if ($this->tip instanceof WrapMiddleware) {
             $this->tip->isFirst();
         }
