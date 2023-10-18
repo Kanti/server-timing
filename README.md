@@ -20,6 +20,7 @@ at the moment there is nothing to configure
 - `mail`: shows the mails that are send (only TYPO3 >=12)
 - `dataP`: Shows the DataProcessors that were executed
 - `extbase`: show all Extbase dispatches, (forwards are included in the original action call)
+- `fileProcessing`: show all file processing calls
 - `http.client`: external API calls are measured if they use the official TYPO3 `RequestFactory` or the `GuzzleClientFactory`)
 
 > if a measurement key has more than 4 entries, they will get combined into one total time with a count.

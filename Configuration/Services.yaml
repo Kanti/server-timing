@@ -39,10 +39,23 @@ services:
         identifier: kanti/server-timing/mail-event-listener
         event: TYPO3\CMS\Core\Mail\Event\AfterMailerSentMessageEvent
         method: stop
-
   Kanti\ServerTiming\EventListener\BootCompletedEventListener:
     tags:
       -
         name: event.listener
         identifier: kanti/server-timing/boot-completed-event-listener
         event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
+
+  Kanti\ServerTiming\EventListener\FileProcessingEventListener:
+    tags:
+      -
+        name: event.listener
+        identifier: kanti/server-timing/file-processing
+        event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
+        method: before
+
+      -
+        name: event.listener
+        identifier: kanti/server-timing/file-processing
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileProcessingEvent
+        method: after
