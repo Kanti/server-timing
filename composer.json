@@ -40,14 +40,14 @@
   },
   "config": {
     "allow-plugins": {
-      "typo3/class-alias-loader": true,
-      "typo3/cms-composer-installers": true,
-      "phpro/grumphp": true,
-      "pluswerk/grumphp-config": true,
-      "infection/extension-installer": true,
-      "phpstan/extension-installer": true,
       "ergebnis/composer-normalize": true,
-      "php-http/discovery": false
+      "infection/extension-installer": true,
+      "php-http/discovery": false,
+      "phpro/grumphp": true,
+      "phpstan/extension-installer": true,
+      "pluswerk/grumphp-config": true,
+      "typo3/class-alias-loader": true,
+      "typo3/cms-composer-installers": true
     }
   },
   "extra": {
