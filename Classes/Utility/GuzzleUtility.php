@@ -23,13 +23,20 @@ final class GuzzleUtility
 
         // initialize early: so the spatie/async with staticfilecache doesn't kill the process
         // there is the problem that it has a subprocess where the Container is not initialized fully
-        $timingUtility = TimingUtility::getInstance();
-        $sentryService = GeneralUtility::makeInstance(SentryService::class);
 
-        return static fn(callable $handler): Closure => static function (RequestInterface $request, array $options) use ($sentryService, $timingUtility, $handler): PromiseInterface {
+        return static fn(callable $handler): Closure => static function (RequestInterface $request, array $options) use ($handler): PromiseInterface {
+            try {
+                GeneralUtility::getContainer();
+            } catch (\LogicException) {
+                // container not found:
+                // than we are most likely in a subprocess (spatie/async)
+                // and we don't want to initialize the container here!
+                return $handler($request, $options);
+            }
+
             $info = $request->getMethod() . ' ' . $request->getUri()->__toString();
-            $stop = $timingUtility->stopWatchInternal('http.client', $info);
-            $request = $sentryService->addSentryTraceHeaders($request, $stop);
+            $stop = TimingUtility::getInstance()->stopWatchInternal('http.client', $info);
+            $request = GeneralUtility::makeInstance(SentryService::class)->addSentryTraceHeaders($request, $stop);
 
             $handlerPromiseCallback = static function ($responseOrException) use ($request, $stop) {
                 $response = null;
