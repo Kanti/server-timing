@@ -6,3 +6,9 @@ sentry_sample_rate =
 
 # cat=sentry; type=string; label=Sentry CLI Sample Rate between 0.0 and 1.0 (empty: keep default)
 sentry_cli_sample_rate =
+
+# cat=sentry; type=integer; label=Number of timings
+number_of_timings =
+
+# cat=sentry; type=integer; label=Length of description
+length_of_description =
