@@ -40,11 +40,6 @@ final class ConfigService
         return (int)($this->getConfig('number_of_timings') ?: self::DEFAULT_NUMBER_TIMINGS);
     }
 
-    public function isMaxNumberOfTimingsSet(): bool
-    {
-        return (bool)($this->getConfig('number_of_timings'));
-    }
-
     private function getConfig(string $path): string
     {
         return (string)($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing'][$path] ?? '');

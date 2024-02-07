@@ -138,8 +138,7 @@ final class TimingUtility implements SingletonInterface
         }
 
         $timings = [];
-        $stopWatches = $this->configService->isMaxNumberOfTimingsSet() ? $this->order : $this->combineIfToMuch($this->order);
-        foreach ($stopWatches as $index => $time) {
+        foreach ($this->combineIfToMuch($this->order) as $index => $time) {
             $duration = $time->getDuration();
             $timings[$duration . $index] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
         }
