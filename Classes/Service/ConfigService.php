@@ -10,7 +10,15 @@ final class ConfigService
 {
     /** @var int */
     private const DEFAULT_STOP_WATCH_LIMIT = 100_000;
+
+    /**
+     * @var int
+     */
     private const DEFAULT_DESCRIPTION_LENGTH = 100;
+
+    /**
+     * @var int
+     */
     private const DEFAULT_NUMBER_TIMINGS = 70;
 
     public function stopWatchLimit(): int

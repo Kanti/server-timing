@@ -142,6 +142,7 @@ final class TimingUtility implements SingletonInterface
             $duration = $time->getDuration();
             $timings[$duration . $index] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
         }
+
         krsort($timings);
         $timings = array_slice($timings, 0, $this->configService->getMaxNumberOfTimings());
 
