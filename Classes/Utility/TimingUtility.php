@@ -147,9 +147,10 @@ final class TimingUtility implements SingletonInterface
 
         rsort($durations);
 
+        $maxNumberOfTimings = $durations[$this->configService->getMaxNumberOfTimings() - 1] ?? 0;
         foreach ($stopWatches as $index => $time) {
             $duration = $time->getDuration();
-            if ($duration >= ($durations[$this->configService->getMaxNumberOfTimings() - 1] ?? 0)) {
+            if ($duration >= $maxNumberOfTimings) {
                 $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
             }
         }

@@ -19,7 +19,7 @@ final class ConfigService
     /**
      * @var int
      */
-    private const DEFAULT_NUMBER_TIMINGS = 70;
+    private const DEFAULT_NUMBER_TIMINGS = 30;
 
     public function stopWatchLimit(): int
     {
