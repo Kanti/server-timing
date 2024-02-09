@@ -138,12 +138,21 @@ final class TimingUtility implements SingletonInterface
         }
 
         $timings = [];
-        foreach ($this->combineIfToMuch($this->order) as $index => $time) {
-            $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info), $time->getDuration());
+        $durations = [];
+        $stopWatches = $this->combineIfToMuch($this->order);
+
+        foreach ($stopWatches as $stopwatch) {
+            $durations[] = $stopwatch->getDuration();
         }
 
-        if (count($timings) > 70) {
-            $timings = [$this->timingString(0, 'To Many measurements ' . count($timings), 0.000001)];
+        rsort($durations);
+
+        $maxNumberOfTimings = $durations[$this->configService->getMaxNumberOfTimings() - 1] ?? 0;
+        foreach ($stopWatches as $index => $time) {
+            $duration = $time->getDuration();
+            if ($duration >= $maxNumberOfTimings) {
+                $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
+            }
         }
 
 
@@ -237,7 +246,7 @@ final class TimingUtility implements SingletonInterface
 
     private function timingString(int $index, string $description, float $durationInSeconds): string
     {
-        $description = substr($description, 0, 100);
+        $description = substr($description, 0, $this->configService->getDescriptionLength());
         $description = str_replace(['\\', '"', ';', "\r", "\n"], ["_", "'", ",", "", ""], $description);
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
     }

@@ -11,6 +11,16 @@ final class ConfigService
     /** @var int */
     private const DEFAULT_STOP_WATCH_LIMIT = 100_000;
 
+    /**
+     * @var int
+     */
+    private const DEFAULT_DESCRIPTION_LENGTH = 100;
+
+    /**
+     * @var int
+     */
+    private const DEFAULT_NUMBER_TIMINGS = 30;
+
     public function stopWatchLimit(): int
     {
         return (int)($this->getConfig('stop_watch_limit') ?: self::DEFAULT_STOP_WATCH_LIMIT);
@@ -26,6 +36,16 @@ final class ConfigService
     {
         $tracesSampleRate = $this->tracesSampleRate();
         return $tracesSampleRate === null ? null : (bool)$tracesSampleRate;
+    }
+
+    public function getDescriptionLength(): int
+    {
+        return (int)($this->getConfig('length_of_description') ?: self::DEFAULT_DESCRIPTION_LENGTH);
+    }
+
+    public function getMaxNumberOfTimings(): int
+    {
+        return (int)($this->getConfig('number_of_timings') ?: self::DEFAULT_NUMBER_TIMINGS);
     }
 
     private function getConfig(string $path): string
