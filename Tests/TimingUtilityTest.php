@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\Tests;
 
 use Generator;
+use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionNoop;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -14,11 +15,16 @@ use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\Container;
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 #[CoversClass(TimingUtility::class)]
 #[CoversClass(StopWatch::class)]
 #[CoversClass(ConfigService::class)]
+#[CoversClass(ScriptResult::class)]
 #[CoversClass(RegisterShutdownFunctionNoop::class)]
 final class TimingUtilityTest extends TestCase
 {
@@ -171,6 +177,96 @@ final class TimingUtilityTest extends TestCase
         ];
     }
 
+    #[Test]
+    #[DataProvider('dataProviderHumanReadableFileSize')]
+    public function testHumanReadableFileSize(string $expected, int $size): void
+    {
+        $reflection = new ReflectionClass(TimingUtility::class);
+        $reflectionMethod = $reflection->getMethod('humanReadableFileSize');
+
+        $result = $reflectionMethod->invoke($this->getTestInstance(), $size);
+        self::assertSame($expected, $result);
+    }
+
+    public static function dataProviderHumanReadableFileSize(): Generator
+    {
+        yield 'simple' => [
+            '48.89 MB',
+            51268468,
+        ];
+        yield 'big' => [
+            '1 EB',
+            1024 ** 6,
+        ];
+    }
+
+    /**
+     * @param StopWatch[] $stopWatches
+     */
+    #[Test]
+    #[DataProvider('dataProviderShutdown')]
+    public function shutdown(string $expected, array $stopWatches, ?int $numberOfTimings, ?int $lengthOfDesccription): void
+    {
+        $timingUtility = $this->getTestInstance();
+        $timingUtility->setStopWatches($stopWatches);
+        GeneralUtility::setContainer(new Container());
+        if ($numberOfTimings) {
+            $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['number_of_timings'] = $numberOfTimings;
+        }
+
+        if ($lengthOfDesccription) {
+            $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['length_of_description'] = $lengthOfDesccription;
+        }
+
+        $response = $timingUtility->shutdown(ScriptResult::fromRequest(new ServerRequest(), new Response()));
+        $result = $response?->getHeader('Server-Timing')[0];
+        self::assertSame($expected, $result);
+    }
+
+    public static function dataProviderShutdown(): Generator
+    {
+        $stopWatch1 = new StopWatch('key1', 'info');
+        $stopWatch1->startTime = 100003.0003;
+        $stopWatch1->stopTime = 100004.0003;
+        $stopWatch2 = new StopWatch('key2', 'info for longer description');
+        $stopWatch2->startTime = 100004.0004;
+        $stopWatch2->stopTime = 100015.0004;
+        $stopWatch3 = new StopWatch('  key3', 'info');
+        $stopWatch3->startTime = 100004.0004;
+        $stopWatch3->stopTime = 100025.0004;
+
+        yield 'simple' => [
+            '000;desc="key1 info 1";dur=1000.00,001;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
+            'number_of_timings' => null,
+            'length_of_description' => null,
+        ];
+        yield 'number_of_timings' => [
+            '001;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
+            'number_of_timings' => 2,
+            'length_of_description' => null,
+        ];
+        yield 'length_of_description' => [
+            '000;desc="key1 info ";dur=1000.00,001;desc="key2 info ";dur=11000.00,002;desc="key3 info ";dur=21000.00',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
+            'number_of_timings' => null,
+            'length_of_description' => 10,
+        ];
+        yield 'unsorted_stop_watches' => [
+            '000;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00',
+            'stopWatches' => [$stopWatch2, $stopWatch1, $stopWatch3],
+            'number_of_timings' => 2,
+            'length_of_description' => null,
+        ];
+        yield 'less_timings' => [
+            '000;desc="key1 info 1";dur=1000.00',
+            'stopWatches' => [$stopWatch1],
+            'number_of_timings' => 5,
+            'length_of_description' => null,
+        ];
+    }
+
     /**
      * @param StopWatch[] $expected
      * @param StopWatch[] $initalStopWatches
@@ -270,6 +366,8 @@ final class TimingUtilityTest extends TestCase
 
     private function getTestInstance(): TimingUtility
     {
-        return new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
+        $timingUtility = new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
+        $timingUtility::$isTesting = true;
+        return $timingUtility;
     }
 }

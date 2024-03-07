@@ -10,6 +10,7 @@ use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
 use Kanti\ServerTiming\Service\SentryService;
 use Kanti\ServerTiming\Service\ConfigService;
+use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\ResponseInterface;
 use SplObjectStorage;
 use TYPO3\CMS\Core\Context\Context;
@@ -25,6 +26,12 @@ final class TimingUtility implements SingletonInterface
 
     /** @var bool */
     public const IS_CLI = PHP_SAPI === 'cli';
+
+    /** @var bool */
+    public static $isTesting = false;
+
+    /** @var int */
+    public const BYTE_MULTIPLICATOR = 1024;
 
     private bool $alreadyShutdown = false;
 
@@ -47,6 +54,14 @@ final class TimingUtility implements SingletonInterface
     public function getStopWatches(): array
     {
         return $this->order;
+    }
+
+    /**
+     * @param StopWatch[] $stopWatches
+     */
+    public function setStopWatches(array $stopWatches): void
+    {
+        $this->order = $stopWatches;
     }
 
     public static function start(string $key, string $info = ''): void
@@ -147,10 +162,10 @@ final class TimingUtility implements SingletonInterface
 
         rsort($durations);
 
-        $maxNumberOfTimings = $durations[$this->configService->getMaxNumberOfTimings() - 1] ?? 0;
+        $minimumDuration = $durations[$this->configService->getMaxNumberOfTimings() - 1] ?? 0;
         foreach ($stopWatches as $index => $time) {
             $duration = $time->getDuration();
-            if ($duration >= $maxNumberOfTimings) {
+            if ($duration >= $minimumDuration) {
                 $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
             }
         }
@@ -176,8 +191,8 @@ final class TimingUtility implements SingletonInterface
     private function humanReadableFileSize(int $size): string
     {
         $fileSizeNames = [" Bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB"];
-        $i = floor(log($size, 1024));
-        return $size ? round($size / (1024 ** $i), 2) . $fileSizeNames[$i] : '0 Bytes';
+        $i = floor(log($size, self::BYTE_MULTIPLICATOR));
+        return $size ? round($size / (self::BYTE_MULTIPLICATOR ** $i), 2) . $fileSizeNames[$i] : '0 Bytes';
     }
 
     /**
@@ -251,8 +266,12 @@ final class TimingUtility implements SingletonInterface
         return sprintf('%03d;desc="%s";dur=%0.2f', $index, $description, $durationInSeconds * 1000);
     }
 
-    public function shouldAddHeader(): bool
+    private function shouldAddHeader(): bool
     {
+        if (self::$isTesting) {
+            return true;
+        }
+
         if (self::IS_CLI) {
             return false;
         }
