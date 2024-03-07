@@ -151,7 +151,7 @@ final class TimingUtility implements SingletonInterface
         foreach ($stopWatches as $index => $time) {
             $duration = $time->getDuration();
             if ($duration >= $maxNumberOfTimings) {
-                $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
+                $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' '), $duration);
             }
         }
 

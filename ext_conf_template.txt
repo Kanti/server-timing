@@ -11,4 +11,4 @@ sentry_cli_sample_rate =
 number_of_timings = 30
 
 # cat=sentry; type=integer; label=Length of description (reduce to make header output smaller. Try out when you get regularly 502 responses).
-length_of_description = 100
+length_of_description = 60
