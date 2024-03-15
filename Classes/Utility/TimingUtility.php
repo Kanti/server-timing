@@ -8,10 +8,8 @@ use Exception;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
-use Kanti\ServerTiming\Service\SentryService;
 use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\SentryServiceInterface;
-use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\ResponseInterface;
 use SplObjectStorage;
 use TYPO3\CMS\Core\Context\Context;
@@ -167,7 +165,7 @@ final class TimingUtility implements SingletonInterface
         foreach ($stopWatches as $index => $time) {
             $duration = $time->getDuration();
             if ($duration >= $minimumDuration) {
-                $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info . ' ' . $duration), $duration);
+                $timings[] = $this->timingString($index, trim($time->key . ' ' . $time->info), $duration);
             }
         }
 

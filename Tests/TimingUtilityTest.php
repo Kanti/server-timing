@@ -248,31 +248,31 @@ final class TimingUtilityTest extends TestCase
         $stopWatch4->stopTime = 100004.0000;
 
         yield 'simple' => [
-            '000;desc="key1 info 1";dur=1000.00,001;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00,003;desc="key4 short duration 0.9997000000003";dur=999.70',
+            '000;desc="key1 info";dur=1000.00,001;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00,003;desc="key4 short duration";dur=999.70',
             'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3, $stopWatch4],
             'number_of_timings' => null,
             'length_of_description' => null,
         ];
         yield 'number_of_timings' => [
-            '001;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00',
+            '001;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00',
             'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
             'number_of_timings' => 2,
             'length_of_description' => null,
         ];
         yield 'length_of_description' => [
-            '000;desc="key1 info ";dur=1000.00,001;desc="key2 info ";dur=11000.00,002;desc="key3 info ";dur=21000.00',
+            '000;desc="key1 info";dur=1000.00,001;desc="key2 info ";dur=11000.00,002;desc="key3 info";dur=21000.00',
             'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
             'number_of_timings' => null,
             'length_of_description' => 10,
         ];
         yield 'unsorted_stop_watches' => [
-            '000;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00',
+            '000;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00',
             'stopWatches' => [$stopWatch2, $stopWatch1, $stopWatch3],
             'number_of_timings' => 2,
             'length_of_description' => null,
         ];
         yield 'less_timings' => [
-            '000;desc="key1 info 1";dur=1000.00',
+            '000;desc="key1 info";dur=1000.00',
             'stopWatches' => [$stopWatch1],
             'number_of_timings' => 5,
             'length_of_description' => null,
