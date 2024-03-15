@@ -8,15 +8,20 @@ use Generator;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionNoop;
+use Kanti\ServerTiming\Service\SentryService;
+use Kanti\ServerTiming\Service\SentryServiceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Container;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -209,7 +214,11 @@ final class TimingUtilityTest extends TestCase
     {
         $timingUtility = $this->getTestInstance();
         $timingUtility->setStopWatches($stopWatches);
-        GeneralUtility::setContainer(new Container());
+
+        $container = new Container();
+        $container->set(SentryService::class, null);
+        GeneralUtility::setContainer($container);
+
         if ($numberOfTimings) {
             $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['number_of_timings'] = $numberOfTimings;
         }
@@ -234,10 +243,13 @@ final class TimingUtilityTest extends TestCase
         $stopWatch3 = new StopWatch('  key3', 'info');
         $stopWatch3->startTime = 100004.0004;
         $stopWatch3->stopTime = 100025.0004;
+        $stopWatch4 = new StopWatch('key4', 'short duration');
+        $stopWatch4->startTime = 100003.0003;
+        $stopWatch4->stopTime = 100004.0000;
 
         yield 'simple' => [
-            '000;desc="key1 info 1";dur=1000.00,001;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00',
-            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
+            '000;desc="key1 info 1";dur=1000.00,001;desc="key2 info for longer description 11";dur=11000.00,002;desc="key3 info 21";dur=21000.00,003;desc="key4 short duration 0.9997000000003";dur=999.70',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3, $stopWatch4],
             'number_of_timings' => null,
             'length_of_description' => null,
         ];
@@ -265,6 +277,43 @@ final class TimingUtilityTest extends TestCase
             'number_of_timings' => 5,
             'length_of_description' => null,
         ];
+    }
+
+    #[Test]
+    public function sendSentryTrace(): void
+    {
+        $providedStopWatches = [];
+        for ($i = 1; $i < 100; $i++) {
+            $stopWatch = new StopWatch('key-' . $i, 'info');
+            $stopWatch->startTime = 100001.0000 + $i;
+            $providedStopWatches[] = $stopWatch;
+        }
+
+        $timingUtility = $this->getTestInstance();
+        $timingUtility->setStopWatches($providedStopWatches);
+
+        $container = new Container();
+        $container->set(
+            SentryServiceInterface::class,
+            new class implements SentryServiceInterface {
+                public function addSentryTraceHeaders(RequestInterface $request, StopWatch $stopWatch): RequestInterface
+                {
+                    return $request;
+                }
+
+                public function sendSentryTrace(ScriptResult $result, array $stopWatches): ?ResponseInterface
+                {
+                    $sortedWatches = $stopWatches;
+                    usort($sortedWatches, static fn($a, $b): int => $b->stopTime <=> $a->stopTime);
+                    TimingUtilityTest::assertSame($sortedWatches, $stopWatches);
+                    TimingUtilityTest::assertNotNull($stopWatches[0]->stopTime);
+                    return new HtmlResponse('');
+                }
+            }
+        );
+        GeneralUtility::setContainer($container);
+
+        $timingUtility->shutdown(ScriptResult::fromRequest(new ServerRequest(), new Response()));
     }
 
     /**

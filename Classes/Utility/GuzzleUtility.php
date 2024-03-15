@@ -8,6 +8,7 @@ use Closure;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use GuzzleHttp\Promise\PromiseInterface;
 use Kanti\ServerTiming\Service\SentryService;
+use Kanti\ServerTiming\Service\SentryServiceInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -36,7 +37,7 @@ final class GuzzleUtility
 
             $info = $request->getMethod() . ' ' . $request->getUri()->__toString();
             $stop = TimingUtility::getInstance()->stopWatchInternal('http.client', $info);
-            $request = GeneralUtility::makeInstance(SentryService::class)->addSentryTraceHeaders($request, $stop);
+            $request = GeneralUtility::makeInstance(SentryServiceInterface::class)->addSentryTraceHeaders($request, $stop);
 
             $handlerPromiseCallback = static function ($responseOrException) use ($request, $stop) {
                 $response = null;

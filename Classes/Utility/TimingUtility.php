@@ -10,6 +10,7 @@ use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
 use Kanti\ServerTiming\Service\SentryService;
 use Kanti\ServerTiming\Service\ConfigService;
+use Kanti\ServerTiming\Service\SentryServiceInterface;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Http\Message\ResponseInterface;
 use SplObjectStorage;
@@ -146,7 +147,7 @@ final class TimingUtility implements SingletonInterface
         }
 
         $container = GeneralUtility::getContainer();
-        $response = $container->has(SentryService::class) ? $container->get(SentryService::class)->sendSentryTrace($result, $this->order) : $result->response;
+        $response = $container->has(SentryServiceInterface::class) ? $container->get(SentryServiceInterface::class)->sendSentryTrace($result, $this->order) : $result->response;
 
         if (!$this->shouldAddHeader()) {
             return $response;
@@ -162,7 +163,7 @@ final class TimingUtility implements SingletonInterface
 
         rsort($durations);
 
-        $minimumDuration = $durations[$this->configService->getMaxNumberOfTimings() - 1] ?? 0;
+        $minimumDuration = $durations[$this->configService->getMaxNumberOfTimings() - 1] ?? PHP_INT_MIN;
         foreach ($stopWatches as $index => $time) {
             $duration = $time->getDuration();
             if ($duration >= $minimumDuration) {
