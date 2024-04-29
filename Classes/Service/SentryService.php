@@ -30,7 +30,7 @@ use function Sentry\continueTrace;
 use function Sentry\getBaggage;
 use function Sentry\getTraceparent;
 
-final class SentryService implements SingletonInterface
+final class SentryService implements SingletonInterface, SentryServiceInterface
 {
     private ?Transaction $transaction = null;
 

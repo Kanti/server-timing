@@ -5,20 +5,32 @@ declare(strict_types=1);
 namespace Kanti\ServerTiming\Tests;
 
 use Generator;
+use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionNoop;
+use Kanti\ServerTiming\Service\SentryService;
+use Kanti\ServerTiming\Service\SentryServiceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Reflection;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\Container;
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 #[CoversClass(TimingUtility::class)]
 #[CoversClass(StopWatch::class)]
 #[CoversClass(ConfigService::class)]
+#[CoversClass(ScriptResult::class)]
 #[CoversClass(RegisterShutdownFunctionNoop::class)]
 final class TimingUtilityTest extends TestCase
 {
@@ -171,6 +183,138 @@ final class TimingUtilityTest extends TestCase
         ];
     }
 
+    #[Test]
+    #[DataProvider('dataProviderHumanReadableFileSize')]
+    public function testHumanReadableFileSize(string $expected, int $size): void
+    {
+        $reflection = new ReflectionClass(TimingUtility::class);
+        $reflectionMethod = $reflection->getMethod('humanReadableFileSize');
+
+        $result = $reflectionMethod->invoke($this->getTestInstance(), $size);
+        self::assertSame($expected, $result);
+    }
+
+    public static function dataProviderHumanReadableFileSize(): Generator
+    {
+        yield 'simple' => [
+            '48.89 MB',
+            51268468,
+        ];
+        yield 'big' => [
+            '1 EB',
+            1024 ** 6,
+        ];
+    }
+
+    /**
+     * @param StopWatch[] $stopWatches
+     */
+    #[Test]
+    #[DataProvider('dataProviderShutdown')]
+    public function shutdown(string $expected, array $stopWatches, ?int $numberOfTimings, ?int $lengthOfDescription): void
+    {
+        $timingUtility = $this->getTestInstance($stopWatches);
+
+        $container = new Container();
+        $container->set(SentryService::class, null);
+        GeneralUtility::setContainer($container);
+
+        if ($numberOfTimings) {
+            $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['number_of_timings'] = $numberOfTimings;
+        }
+
+        if ($lengthOfDescription) {
+            $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['length_of_description'] = $lengthOfDescription;
+        }
+
+        $response = $timingUtility->shutdown(ScriptResult::fromRequest(new ServerRequest(), new Response()));
+        $result = $response?->getHeader('Server-Timing')[0];
+        self::assertSame($expected, $result);
+    }
+
+    public static function dataProviderShutdown(): Generator
+    {
+        $stopWatch1 = new StopWatch('key1', 'info');
+        $stopWatch1->startTime = 100003.0003;
+        $stopWatch1->stopTime = 100004.0003;
+        $stopWatch2 = new StopWatch('key2', 'info for longer description');
+        $stopWatch2->startTime = 100004.0004;
+        $stopWatch2->stopTime = 100015.0004;
+        $stopWatch3 = new StopWatch('  key3', 'info');
+        $stopWatch3->startTime = 100004.0004;
+        $stopWatch3->stopTime = 100025.0004;
+        $stopWatch4 = new StopWatch('key4', 'short duration');
+        $stopWatch4->startTime = 100003.0003;
+        $stopWatch4->stopTime = 100004.0000;
+
+        yield 'simple' => [
+            '000;desc="key1 info";dur=1000.00,001;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00,003;desc="key4 short duration";dur=999.70',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3, $stopWatch4],
+            'numberOfTimings' => null,
+            'lengthOfDescription' => null,
+        ];
+        yield 'numberOfTimings' => [
+            '001;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
+            'numberOfTimings' => 2,
+            'lengthOfDescription' => null,
+        ];
+        yield 'lengthOfDescription' => [
+            '000;desc="key1 info";dur=1000.00,001;desc="key2 info ";dur=11000.00,002;desc="key3 info";dur=21000.00',
+            'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
+            'numberOfTimings' => null,
+            'lengthOfDescription' => 10,
+        ];
+        yield 'unsorted_stop_watches' => [
+            '000;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00',
+            'stopWatches' => [$stopWatch2, $stopWatch1, $stopWatch3],
+            'numberOfTimings' => 2,
+            'lengthOfDescription' => null,
+        ];
+        yield 'less_timings' => [
+            '000;desc="key1 info";dur=1000.00',
+            'stopWatches' => [$stopWatch1],
+            'numberOfTimings' => 5,
+            'lengthOfDescription' => null,
+        ];
+    }
+
+    #[Test]
+    public function sendSentryTrace(): void
+    {
+        $providedStopWatches = [];
+        for ($i = 1; $i < 100; $i++) {
+            $stopWatch = new StopWatch('key-' . $i, 'info');
+            $stopWatch->startTime = 100001.0000 + $i;
+            $providedStopWatches[] = $stopWatch;
+        }
+
+        $timingUtility = $this->getTestInstance($providedStopWatches);
+
+        $container = new Container();
+        $container->set(
+            SentryServiceInterface::class,
+            new class implements SentryServiceInterface {
+                public function addSentryTraceHeaders(RequestInterface $request, StopWatch $stopWatch): RequestInterface
+                {
+                    return $request;
+                }
+
+                public function sendSentryTrace(ScriptResult $result, array $stopWatches): ?ResponseInterface
+                {
+                    $sortedWatches = $stopWatches;
+                    usort($sortedWatches, static fn($a, $b): int => $b->stopTime <=> $a->stopTime);
+                    TimingUtilityTest::assertSame($sortedWatches, $stopWatches);
+                    TimingUtilityTest::assertNotNull($stopWatches[0]->stopTime);
+                    return new HtmlResponse('');
+                }
+            }
+        );
+        GeneralUtility::setContainer($container);
+
+        $timingUtility->shutdown(ScriptResult::fromRequest(new ServerRequest(), new Response()));
+    }
+
     /**
      * @param StopWatch[] $expected
      * @param StopWatch[] $initalStopWatches
@@ -268,8 +412,15 @@ final class TimingUtilityTest extends TestCase
         self::assertFalse($timingUtility->shouldTrack());
     }
 
-    private function getTestInstance(): TimingUtility
+    /**
+     * @param StopWatch[] $stopWatches
+     */
+    private function getTestInstance(array $stopWatches = []): TimingUtility
     {
-        return new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
+        $timingUtility = new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
+        $timingUtility::$isTesting = true;
+        $reflection = new \ReflectionClass($timingUtility);
+        $reflection->getProperty('order')->setValue($timingUtility, $stopWatches);
+        return $timingUtility;
     }
 }

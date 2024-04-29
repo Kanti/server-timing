@@ -14,6 +14,9 @@ services:
   Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface:
     class: Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction
 
+  Kanti\ServerTiming\Service\SentryServiceInterface:
+    class: Kanti\ServerTiming\Service\SentryService
+
   Kanti\ServerTiming\EventListener\ConsoleCommandEventListener:
     tags:
       -
