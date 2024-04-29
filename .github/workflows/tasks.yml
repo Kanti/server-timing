@@ -37,8 +37,9 @@ jobs:
       - run: composer test
       - run: jq 'del(.logs.html)' infection.json > infection.json.new && mv infection.json.new infection.json
       - run: composer infection
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: Resources/Public/test-result/clover.xml
 
   ter-release:
