@@ -7,6 +7,7 @@ namespace Kanti\ServerTiming\Utility;
 use Exception;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
+use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
 use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\SentryServiceInterface;
@@ -40,7 +41,7 @@ final class TimingUtility implements SingletonInterface
 
     public static function getInstance(): TimingUtility
     {
-        return static::$instance ??= GeneralUtility::makeInstance(TimingUtility::class);
+        return static::$instance ??= GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
     }
 
     /** @var StopWatch[] */
