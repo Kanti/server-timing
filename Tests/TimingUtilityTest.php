@@ -18,6 +18,7 @@ use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Reflection;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Container;
 use TYPO3\CMS\Core\Core\Environment;
@@ -210,10 +211,9 @@ final class TimingUtilityTest extends TestCase
      */
     #[Test]
     #[DataProvider('dataProviderShutdown')]
-    public function shutdown(string $expected, array $stopWatches, ?int $numberOfTimings, ?int $lengthOfDesccription): void
+    public function shutdown(string $expected, array $stopWatches, ?int $numberOfTimings, ?int $lengthOfDescription): void
     {
-        $timingUtility = $this->getTestInstance();
-        $timingUtility->setStopWatches($stopWatches);
+        $timingUtility = $this->getTestInstance($stopWatches);
 
         $container = new Container();
         $container->set(SentryService::class, null);
@@ -223,8 +223,8 @@ final class TimingUtilityTest extends TestCase
             $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['number_of_timings'] = $numberOfTimings;
         }
 
-        if ($lengthOfDesccription) {
-            $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['length_of_description'] = $lengthOfDesccription;
+        if ($lengthOfDescription) {
+            $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['length_of_description'] = $lengthOfDescription;
         }
 
         $response = $timingUtility->shutdown(ScriptResult::fromRequest(new ServerRequest(), new Response()));
@@ -250,32 +250,32 @@ final class TimingUtilityTest extends TestCase
         yield 'simple' => [
             '000;desc="key1 info";dur=1000.00,001;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00,003;desc="key4 short duration";dur=999.70',
             'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3, $stopWatch4],
-            'number_of_timings' => null,
-            'length_of_description' => null,
+            'numberOfTimings' => null,
+            'lengthOfDescription' => null,
         ];
-        yield 'number_of_timings' => [
+        yield 'numberOfTimings' => [
             '001;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00',
             'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
-            'number_of_timings' => 2,
-            'length_of_description' => null,
+            'numberOfTimings' => 2,
+            'lengthOfDescription' => null,
         ];
-        yield 'length_of_description' => [
+        yield 'lengthOfDescription' => [
             '000;desc="key1 info";dur=1000.00,001;desc="key2 info ";dur=11000.00,002;desc="key3 info";dur=21000.00',
             'stopWatches' => [$stopWatch1, $stopWatch2, $stopWatch3],
-            'number_of_timings' => null,
-            'length_of_description' => 10,
+            'numberOfTimings' => null,
+            'lengthOfDescription' => 10,
         ];
         yield 'unsorted_stop_watches' => [
             '000;desc="key2 info for longer description";dur=11000.00,002;desc="key3 info";dur=21000.00',
             'stopWatches' => [$stopWatch2, $stopWatch1, $stopWatch3],
-            'number_of_timings' => 2,
-            'length_of_description' => null,
+            'numberOfTimings' => 2,
+            'lengthOfDescription' => null,
         ];
         yield 'less_timings' => [
             '000;desc="key1 info";dur=1000.00',
             'stopWatches' => [$stopWatch1],
-            'number_of_timings' => 5,
-            'length_of_description' => null,
+            'numberOfTimings' => 5,
+            'lengthOfDescription' => null,
         ];
     }
 
@@ -289,8 +289,7 @@ final class TimingUtilityTest extends TestCase
             $providedStopWatches[] = $stopWatch;
         }
 
-        $timingUtility = $this->getTestInstance();
-        $timingUtility->setStopWatches($providedStopWatches);
+        $timingUtility = $this->getTestInstance($providedStopWatches);
 
         $container = new Container();
         $container->set(
@@ -413,10 +412,15 @@ final class TimingUtilityTest extends TestCase
         self::assertFalse($timingUtility->shouldTrack());
     }
 
-    private function getTestInstance(): TimingUtility
+    /**
+     * @param StopWatch[] $stopWatches
+     */
+    private function getTestInstance(array $stopWatches = []): TimingUtility
     {
         $timingUtility = new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
         $timingUtility::$isTesting = true;
+        $reflection = new \ReflectionClass($timingUtility);
+        $reflection->getProperty('order')->setValue($timingUtility, $stopWatches);
         return $timingUtility;
     }
 }

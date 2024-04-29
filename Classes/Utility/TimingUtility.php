@@ -55,14 +55,6 @@ final class TimingUtility implements SingletonInterface
         return $this->order;
     }
 
-    /**
-     * @param StopWatch[] $stopWatches
-     */
-    public function setStopWatches(array $stopWatches): void
-    {
-        $this->order = $stopWatches;
-    }
-
     public static function start(string $key, string $info = ''): void
     {
         self::getInstance()->startInternal($key, $info);
