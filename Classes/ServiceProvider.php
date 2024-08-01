@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming;
 
+use Closure;
 use Kanti\ServerTiming\Middleware\XClassMiddlewareDispatcher;
 use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Backend\Http\Application as ApplicationBE;
@@ -18,7 +19,7 @@ use TYPO3\CMS\Frontend\Http\RequestHandler as RequestHandlerFE;
 
 final class ServiceProvider extends AbstractServiceProvider
 {
-    public static function getPackagePath(): string
+    protected static function getPackagePath(): string
     {
         return __DIR__ . '/../';
     }
@@ -29,7 +30,7 @@ final class ServiceProvider extends AbstractServiceProvider
     }
 
     /**
-     * @return array<string, \Closure>
+     * @return array<string, Closure>
      */
     public function getFactories(): array
     {
@@ -46,6 +47,13 @@ final class ServiceProvider extends AbstractServiceProvider
             $container->get('frontend.middlewares'),
             $container,
         );
+        if (version_compare((new Typo3Version())->getBranch(), '13.0', '>=')) {
+            return new ApplicationFE(
+                $requestHandler,
+                $container->get(Context::class),
+            );
+        }
+
         if (version_compare((new Typo3Version())->getBranch(), '12.0', '>=') && class_exists(BackendEntryPointResolver::class)) {
             return new ApplicationFE(
                 $requestHandler,
@@ -69,6 +77,13 @@ final class ServiceProvider extends AbstractServiceProvider
             $container->get('backend.middlewares'),
             $container,
         );
+        if (version_compare((new Typo3Version())->getBranch(), '13.0', '>=')) {
+            return new ApplicationBE(
+                $requestHandler,
+                $container->get(Context::class),
+            );
+        }
+
         if (version_compare((new Typo3Version())->getBranch(), '12.0', '>=') && class_exists(BackendEntryPointResolver::class)) {
             return new ApplicationBE(
                 $requestHandler,

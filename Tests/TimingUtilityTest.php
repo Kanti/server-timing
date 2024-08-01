@@ -412,6 +412,17 @@ final class TimingUtilityTest extends TestCase
         self::assertFalse($timingUtility->shouldTrack());
     }
 
+    #[Test]
+    public function chunkStringArray(): void
+    {
+        $reflection = new ReflectionClass(TimingUtility::class);
+        $reflectionMethod = $reflection->getMethod('chunkStringArray');
+        $reflectionMethod->setAccessible(true);
+
+        $result = $reflectionMethod->invoke($this->getTestInstance(), ['a', 'b', 'c', 'd', 'e', 'f'], 4);
+        self::assertSame(['a,b', 'c,d', 'e,f'], $result);
+    }
+
     /**
      * @param StopWatch[] $stopWatches
      */
@@ -419,7 +430,7 @@ final class TimingUtilityTest extends TestCase
     {
         $timingUtility = new TimingUtility(new RegisterShutdownFunctionNoop(), new ConfigService());
         $timingUtility::$isTesting = true;
-        $reflection = new \ReflectionClass($timingUtility);
+        $reflection = new ReflectionClass($timingUtility);
         $reflection->getProperty('order')->setValue($timingUtility, $stopWatches);
         return $timingUtility;
     }

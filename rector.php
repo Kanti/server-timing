@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
-use Rector\PHPUnit\Set\PHPUnitLevelSetList;
 use PLUS\GrumPHPConfig\RectorSettings;
+use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\Config\RectorConfig;
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
-use Rector\PHPUnit\Set\PHPUnitSetList;
+use Rector\DeadCode\Rector\Cast\RecastingRemovalRector;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPublicMethodParameterRector;
+use Rector\TypeDeclaration\Rector\ClassMethod\ParamTypeByMethodCallTypeRector;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->parallel();
@@ -17,7 +18,7 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->cacheDirectory('./var/cache/rector');
 
     $rectorConfig->paths(
-        array_filter(explode("\n", (string)shell_exec("git ls-files | xargs ls -d 2>/dev/null | grep -E '\.(php|html|typoscript)$'")))
+        array_filter(explode("\n", (string)shell_exec("git ls-files | xargs ls -d 2>/dev/null | grep -E '\.(php)$'")))
     );
 
     // define sets of rules
@@ -25,13 +26,6 @@ return static function (RectorConfig $rectorConfig): void {
         [
             ...RectorSettings::sets(true),
             ...RectorSettings::setsTypo3(false),
-            PHPUnitLevelSetList::UP_TO_PHPUNIT_100,
-            PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
-            PHPUnitSetList::PHPUNIT_CODE_QUALITY,
-            PHPUnitSetList::PHPUNIT_YIELD_DATA_PROVIDER,
-            PHPUnitSetList::PHPUNIT_EXCEPTION,
-            PHPUnitSetList::PHPUNIT_SPECIFIC_METHOD,
-            PHPUnitSetList::REMOVE_MOCKS,
         ]
     );
 
@@ -42,11 +36,19 @@ return static function (RectorConfig $rectorConfig): void {
             ...RectorSettings::skip(),
             ...RectorSettings::skipTypo3(),
 
-            MakeInheritedMethodVisibilitySameAsParentRector::class
-
             /**
              * rector should not touch these files
              */
+            RemoveUnusedPublicMethodParameterRector::class,
+            MakeInheritedMethodVisibilitySameAsParentRector::class => [
+                __DIR__ . '/Classes/ServiceProvider.php',
+            ],
+            RecastingRemovalRector::class => [
+                __DIR__ . '/Classes/SqlLogging/LoggingConnection.php',
+            ],
+            ParamTypeByMethodCallTypeRector::class => [
+                __DIR__ . '/Classes/SqlLogging/SqlLoggerCore11.php',
+            ],
             //__DIR__ . '/src/Example',
             //__DIR__ . '/src/Example.php',
         ]

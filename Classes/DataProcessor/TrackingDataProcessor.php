@@ -21,7 +21,7 @@ final class TrackingDataProcessor implements DataProcessorInterface, SingletonIn
      * @param array<array-key, mixed> $processedData
      * @return array<array-key, mixed>
      */
-    public function process(ContentObjectRenderer $cObj, array $contentObjectConfiguration, array $processorConfiguration, array $processedData)
+    public function process(ContentObjectRenderer $cObj, array $contentObjectConfiguration, array $processorConfiguration, array $processedData): array
     {
         $id = (string)$processorConfiguration['id'];
         $stopWatch = $this->stopWatches[$id] ?? null;
