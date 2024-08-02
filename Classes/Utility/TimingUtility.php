@@ -20,6 +20,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TimingUtility implements SingletonInterface
 {
+    public const MAX_SINGLE_HEADER_SIZE = 2 ** 12;
+
     private static ?TimingUtility $instance = null;
 
     private bool $registered = false;
@@ -163,19 +165,23 @@ final class TimingUtility implements SingletonInterface
         }
 
 
-        $headerString = implode(',', $timings);
         if (!$timings) {
             return $response;
         }
 
+        $chunks = $this->chunkStringArray($timings, self::MAX_SINGLE_HEADER_SIZE - strlen('Server-Timing: '));
+
         $memoryUsage = $this->humanReadableFileSize(memory_get_peak_usage());
         if ($response) {
             return $response
-                ->withAddedHeader('Server-Timing', $headerString)
+                ->withAddedHeader('Server-Timing', $chunks)
                 ->withAddedHeader('X-Max-Memory-Usage', $memoryUsage);
         }
 
-        header('Server-Timing: ' . $headerString, false);
+        foreach ($chunks as $chunk) {
+            header('Server-Timing: ' . $chunk, false);
+        }
+
         header('X-Max-Memory-Usage: ' . $memoryUsage, false);
         return $response;
     }
@@ -283,5 +289,28 @@ final class TimingUtility implements SingletonInterface
     private function isBackendUser(): bool
     {
         return (bool)GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('backend.user', 'isLoggedIn');
+    }
+
+    /**
+     * @param list<string> $timings
+     * @return list<string>
+     */
+    private function chunkStringArray(array $timings, int $maxLength): array
+    {
+        $result = [];
+        $length = 0;
+        $index = 0;
+        foreach ($timings as $timing) {
+            $length += 1 + strlen($timing);
+            if ($length > $maxLength) {
+                $index++;
+                $length = strlen($timing);
+            }
+
+            $result[$index] ??= '';
+            $result[$index] .= ($result[$index] ? ',' : '') . $timing;
+        }
+
+        return $result;
     }
 }

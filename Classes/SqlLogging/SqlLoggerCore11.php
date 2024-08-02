@@ -8,6 +8,7 @@ use Doctrine\DBAL\Logging\SQLLogger;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -20,6 +21,10 @@ final class SqlLoggerCore11
      */
     public static function registerSqlLogger(): void
     {
+        if (version_compare((new Typo3Version())->getBranch(), '12.3', '>=')) {
+            return;
+        }
+
         $doctrineSqlLogger = new DoctrineSqlLogger();
 
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);

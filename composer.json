@@ -12,20 +12,18 @@
   "require": {
     "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
     "composer-runtime-api": "^2.0.0",
-    "typo3/cms-core": "^11.0 || ^12.0",
-    "typo3/cms-extbase": "^11.0 || ^12.0"
+    "typo3/cms-core": "^11.0 || ^12.0 || ^13.0",
+    "typo3/cms-extbase": "^11.0 || ^12.0 || ^13.0"
   },
   "require-dev": {
-    "andersundsehr/resource-watcher": "dev-master",
-    "infection/infection": "^0.26.13",
+    "infection/infection": "^0.26.13 || ^0.27.11",
     "phpstan/extension-installer": "^1.1",
-    "phpunit/phpunit": "^10",
-    "pluswerk/grumphp-config": "^6.8.0",
-    "saschaegerer/phpstan-typo3": "^1.1",
+    "phpunit/phpunit": "^10 || ^11",
+    "pluswerk/grumphp-config": "^7",
+    "saschaegerer/phpstan-typo3": "^1.10.1",
     "sentry/sdk": "^3.5",
-    "spatie/phpunit-watcher": "^1.23",
-    "ssch/typo3-rector": "^1.1.3",
-    "typo3/cms-adminpanel": "^11.0 || ^12.0"
+    "ssch/typo3-rector": "^2.6.4",
+    "typo3/cms-adminpanel": "^11.0 || ^12.0 || ^13.0"
   },
   "minimum-stability": "stable",
   "autoload": {

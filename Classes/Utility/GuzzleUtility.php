@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Utility;
 
+use LogicException;
+use Throwable;
 use Closure;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -28,7 +30,7 @@ final class GuzzleUtility
         return static fn(callable $handler): Closure => static function (RequestInterface $request, array $options) use ($handler): PromiseInterface {
             try {
                 GeneralUtility::getContainer();
-            } catch (\LogicException) {
+            } catch (LogicException) {
                 // container not found:
                 // than we are most likely in a subprocess (spatie/async)
                 // and we don't want to initialize the container here!
@@ -52,7 +54,7 @@ final class GuzzleUtility
                     $stop->info = $request->getMethod() . ' ' . $response->getStatusCode() . ' ' . $request->getUri()->__toString();
                 }
 
-                if ($responseOrException instanceof \Throwable) {
+                if ($responseOrException instanceof Throwable) {
                     throw $responseOrException;
                 }
 

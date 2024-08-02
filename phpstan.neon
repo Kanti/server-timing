@@ -8,3 +8,5 @@ parameters:
   typo3:
       requestGetAttributeMapping:
           middleware.in.total: Kanti\ServerTiming\Dto\StopWatch|null
+  excludePaths:
+    - Classes/SqlLogging/SqlLoggerCore11.php

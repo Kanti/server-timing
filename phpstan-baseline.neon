@@ -6,6 +6,46 @@ parameters:
 			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
 
 		-
+			message: "#^Using nullsafe method call on non\\-nullable type Kanti\\\\ServerTiming\\\\Dto\\\\StopWatch\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: Classes/Middleware/WrapMiddleware.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 2 parameters, 4 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 3 parameters, 4 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 2 parameters, 4 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 3 parameters, 4 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$configurationManager of class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor expects TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\ConfigurationManager, TYPO3\\\\CMS\\\\Core\\\\Context\\\\Context given\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$configurationManager of class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor expects TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\ConfigurationManager, TYPO3\\\\CMS\\\\Core\\\\Context\\\\Context given\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#1 \\$loggers of class Doctrine\\\\DBAL\\\\Logging\\\\LoggerChain constructor expects iterable\\<Doctrine\\\\DBAL\\\\Logging\\\\SQLLogger\\>, array\\<int, Doctrine\\\\DBAL\\\\Logging\\\\SQLLogger\\|TYPO3\\\\CMS\\\\Adminpanel\\\\Log\\\\DoctrineSqlLogger\\> given\\.$#"
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
 			message: "#^Call to method getMessage\\(\\) on an unknown class TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\BeforeMailerSentMessageEvent\\.$#"
 			count: 1
 			path: Classes/EventListener/MailEventListener.php
@@ -224,3 +264,208 @@ parameters:
 			message: "#^Used function Sentry\\\\getTraceparent not found\\.$#"
 			count: 1
 			path: Classes/Service/SentryService.php
+
+		-
+			message: "#^Call to an undefined method Doctrine\\\\DBAL\\\\Configuration\\:\\:getSQLLogger\\(\\)\\.$#"
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: "#^Call to an undefined method Doctrine\\\\DBAL\\\\Configuration\\:\\:setSQLLogger\\(\\)\\.$#"
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: "#^Instantiated class Doctrine\\\\DBAL\\\\Logging\\\\LoggerChain not found\\.$#"
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Kanti\\\\ServerTiming\\\\Dto\\\\StopWatch\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: Classes/Middleware/WrapMiddleware.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 3 parameters, 2 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 4 parameters, 2 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 3 parameters, 2 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 4 parameters, 2 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$context of class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor expects TYPO3\\\\CMS\\\\Core\\\\Context\\\\Context, TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\ConfigurationManager given\\.$#"
+			count: 2
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$context of class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor expects TYPO3\\\\CMS\\\\Core\\\\Context\\\\Context, TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\ConfigurationManager given\\.$#"
+			count: 2
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Method Doctrine\\\\DBAL\\\\Driver\\\\Middleware\\\\AbstractStatementMiddleware\\:\\:execute\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\:\\:execute\\(\\) has parameter \\$params with no type specified\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: "#^Call to an undefined method Doctrine\\\\DBAL\\\\Configuration\\:\\:setSQLLogger\\(\\)\\.$#"
+			count: 1
+			path: Classes/SqlLogging/SqlLoggerCore11.php
+
+		-
+			message: "#^Method class@anonymous/Classes/SqlLogging/SqlLoggerCore11\\.php\\:33\\:\\:startQuery\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Classes/SqlLogging/SqlLoggerCore11.php
+
+		-
+			message: "#^Method class@anonymous/Classes/SqlLogging/SqlLoggerCore11\\.php\\:33\\:\\:startQuery\\(\\) has parameter \\$sql with no type specified\\.$#"
+			count: 1
+			path: Classes/SqlLogging/SqlLoggerCore11.php
+
+		-
+			message: "#^Method class@anonymous/Classes/SqlLogging/SqlLoggerCore11\\.php\\:33\\:\\:startQuery\\(\\) has parameter \\$types with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Classes/SqlLogging/SqlLoggerCore11.php
+
+		-
+			message: "#^Call to method getMessage\\(\\) on an unknown class TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\BeforeMailerSentMessageEvent\\.$#"
+			count: 1
+			path: Classes/EventListener/MailEventListener.php
+
+		-
+			message: "#^Parameter \\$event of method Kanti\\\\ServerTiming\\\\EventListener\\\\MailEventListener\\:\\:start\\(\\) has invalid type TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\BeforeMailerSentMessageEvent\\.$#"
+			count: 1
+			path: Classes/EventListener/MailEventListener.php
+
+		-
+			message: "#^Parameter \\$event of method Kanti\\\\ServerTiming\\\\EventListener\\\\MailEventListener\\:\\:stop\\(\\) has invalid type TYPO3\\\\CMS\\\\Core\\\\Mail\\\\Event\\\\AfterMailerSentMessageEvent\\.$#"
+			count: 1
+			path: Classes/EventListener/MailEventListener.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Kanti\\\\ServerTiming\\\\Dto\\\\StopWatch\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: Classes/Middleware/WrapMiddleware.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 2 parameters, 3 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor invoked with 4 parameters, 3 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 2 parameters, 3 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor invoked with 4 parameters, 3 required\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$configurationManager of class TYPO3\\\\CMS\\\\Backend\\\\Http\\\\Application constructor expects TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\ConfigurationManager, TYPO3\\\\CMS\\\\Core\\\\Context\\\\Context given\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$configurationManager of class TYPO3\\\\CMS\\\\Frontend\\\\Http\\\\Application constructor expects TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\ConfigurationManager, TYPO3\\\\CMS\\\\Core\\\\Context\\\\Context given\\.$#"
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\:\\:__construct\\(\\) calls parent\\:\\:__construct\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingConnection.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\:\\:exec\\(\\) calls parent\\:\\:exec\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingConnection.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\:\\:prepare\\(\\) calls parent\\:\\:prepare\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingConnection.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\:\\:query\\(\\) calls parent\\:\\:query\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingConnection.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\:\\:prepare\\(\\) return type has no value type specified in iterable type Doctrine\\\\DBAL\\\\Driver\\\\Statement\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingConnection.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\:\\:prepare\\(\\) should return Doctrine\\\\DBAL\\\\Driver\\\\Statement but returns Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingConnection.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver\\:\\:__construct\\(\\) calls parent\\:\\:__construct\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingDriver.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver\\:\\:connect\\(\\) calls parent\\:\\:connect\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingDriver.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver\\:\\:connect\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingDriver.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver\\:\\:connect\\(\\) should return Doctrine\\\\DBAL\\\\Driver\\\\Connection but returns Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingConnection\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingDriver.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingMiddleware\\:\\:wrap\\(\\) should return Doctrine\\\\DBAL\\\\Driver but returns Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingDriver\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingMiddleware.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\:\\:__construct\\(\\) calls parent\\:\\:__construct\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: "#^Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\:\\:execute\\(\\) calls parent\\:\\:execute\\(\\) but Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement does not extend any class\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\:\\:__construct\\(\\) has parameter \\$statement with no value type specified in iterable type Doctrine\\\\DBAL\\\\Driver\\\\Statement\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\:\\:execute\\(\\) has parameter \\$params with no type specified\\.$#"
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
