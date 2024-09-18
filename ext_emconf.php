@@ -13,7 +13,7 @@ $EM_CONF[$_EXTKEY] = [
     'version' => InstalledVersions::getPrettyVersion('kanti/server-timing'),
     'constraints' => [
         'depends' => [
-            'typo3' => '11.0.0-13.2.99',
+            'typo3' => '11.0.0-13.3.99',
         ],
         'conflicts' => [],
         'suggests' => [],
