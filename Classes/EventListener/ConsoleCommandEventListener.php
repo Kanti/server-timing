@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\EventListener;
 
+use Exception;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -24,7 +25,7 @@ final class ConsoleCommandEventListener
     {
         $stopWatch = array_pop($this->stopWatches);
         if ($stopWatch === null) {
-            throw new \Exception('No stopWatch found, did you start the command already?');
+            throw new Exception('No stopWatch found, did you start the command already?');
         }
         $stopWatch->stop();
         if (!$this->stopWatches) {
