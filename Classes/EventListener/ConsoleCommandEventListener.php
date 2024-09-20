@@ -23,6 +23,9 @@ final class ConsoleCommandEventListener
     public function stop(ConsoleTerminateEvent $event): void
     {
         $stopWatch = array_pop($this->stopWatches);
+        if ($stopWatch === null) {
+            throw new \Exception('No stopWatch found, did you start the command already?');
+        }
         $stopWatch->stop();
         if (!$this->stopWatches) {
             TimingUtility::getInstance()->shutdown(ScriptResult::fromCli($event->getExitCode()));
