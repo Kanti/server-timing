@@ -1,6 +1,8 @@
 name: Tasks
 
-on: push
+on: 
+  push:
+  pull_request:
 
 jobs:
   lint-php:
