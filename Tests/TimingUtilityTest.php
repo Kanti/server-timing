@@ -48,6 +48,10 @@ final class TimingUtilityTest extends TestCase
     public function getInstance(): void
     {
         self::assertInstanceOf(TimingUtility::class, $firstCall = TimingUtility::getInstance());
+        // even if we clear GeneralUtility, the instance should be the same
+        // we measure so erly in TYPO3s bootstrap, that GeneralUtility singletons are cleared after our first measurement
+        // but we need to be sure, that the instance is not recreated as that will run the shutdown function again, and that is not good!
+        GeneralUtility::resetSingletonInstances([]);
         self::assertSame($firstCall, TimingUtility::getInstance());
     }
 

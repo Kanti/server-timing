@@ -789,7 +789,7 @@ parameters:
 			path: Tests/TimingUtilityTest.php
 
 		-
-			message: '#^Method Kanti\\ServerTiming\\Service\\SentryServiceInterface@anonymous/Tests/TimingUtilityTest\.php\:305\:\:sendSentryTrace\(\) never returns null so it can be removed from the return type\.$#'
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryServiceInterface@anonymous/Tests/TimingUtilityTest\.php\:[0-9]+\:\:sendSentryTrace\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: Tests/TimingUtilityTest.php

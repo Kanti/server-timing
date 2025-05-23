@@ -22,6 +22,8 @@ final class TimingUtility implements SingletonInterface
 {
     public const MAX_SINGLE_HEADER_SIZE = 2 ** 12;
 
+    private static ?TimingUtility $instance = null;
+
     private bool $registered = false;
 
     /** @var bool */
@@ -41,7 +43,7 @@ final class TimingUtility implements SingletonInterface
 
     public static function getInstance(): TimingUtility
     {
-        return GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
+        return static::$instance ??= GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
     }
 
     /** @var StopWatch[] */
