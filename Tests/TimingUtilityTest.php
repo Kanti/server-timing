@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Tests;
 
+use Exception;
 use Generator;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Service\ConfigService;
@@ -18,10 +19,8 @@ use Kanti\ServerTiming\Utility\TimingUtility;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Reflection;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Container;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ServerRequest;
@@ -95,8 +94,8 @@ final class TimingUtilityTest extends TestCase
     #[Test]
     public function stopWatchInternal(): void
     {
-        TimingUtility::getInstance()->stopWatchInternal('test');
-        self::assertTrue(true, 'isCallable');
+        $stopWatch = TimingUtility::getInstance()->stopWatchInternal('test');
+        self::assertInstanceOf(StopWatch::class, $stopWatch);
     }
 
     #[Test]
@@ -227,9 +226,15 @@ final class TimingUtilityTest extends TestCase
             $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['server_timing']['length_of_description'] = $lengthOfDescription;
         }
 
+        $reflection = new ReflectionClass(TimingUtility::class);
+        $isAlreadyShutdown = $reflection->getProperty('alreadyShutdown');
+        self::assertFalse($isAlreadyShutdown->getValue($timingUtility));
+
         $response = $timingUtility->shutdown(ScriptResult::fromRequest(new ServerRequest(), new Response()));
         $result = $response?->getHeader('Server-Timing')[0];
         self::assertSame($expected, $result);
+
+        self::assertTrue($isAlreadyShutdown->getValue($timingUtility));
     }
 
     public static function dataProviderShutdown(): Generator
@@ -237,12 +242,15 @@ final class TimingUtilityTest extends TestCase
         $stopWatch1 = new StopWatch('key1', 'info');
         $stopWatch1->startTime = 100003.0003;
         $stopWatch1->stopTime = 100004.0003;
+
         $stopWatch2 = new StopWatch('key2', 'info for longer description');
         $stopWatch2->startTime = 100004.0004;
         $stopWatch2->stopTime = 100015.0004;
+
         $stopWatch3 = new StopWatch('  key3', 'info');
         $stopWatch3->startTime = 100004.0004;
         $stopWatch3->stopTime = 100025.0004;
+
         $stopWatch4 = new StopWatch('key4', 'short duration');
         $stopWatch4->startTime = 100003.0003;
         $stopWatch4->stopTime = 100004.0000;
@@ -300,6 +308,9 @@ final class TimingUtilityTest extends TestCase
                     return $request;
                 }
 
+                /**
+                 * @param list<StopWatch> $stopWatches
+                 */
                 public function sendSentryTrace(ScriptResult $result, array $stopWatches): ?ResponseInterface
                 {
                     $sortedWatches = $stopWatches;
@@ -336,21 +347,27 @@ final class TimingUtilityTest extends TestCase
         $stopWatchX = new StopWatch('x', 'info');
         $stopWatchX->startTime = 100001.0001;
         $stopWatchX->stopTime = 100002.0001;
+
         $stopWatchX2 = new StopWatch('x', 'info');
         $stopWatchX2->startTime = 100002.0002;
         $stopWatchX2->stopTime = 100003.0002;
+
         $stopWatchA = new StopWatch('key', 'info');
         $stopWatchA->startTime = 100003.0003;
         $stopWatchA->stopTime = 100004.0003;
+
         $stopWatchB = new StopWatch('key', 'info');
         $stopWatchB->startTime = 100004.0004;
         $stopWatchB->stopTime = 100005.0004;
+
         $stopWatchBig1 = new StopWatch('key', 'info');
         $stopWatchBig1->startTime = 100005.0005;
         $stopWatchBig1->stopTime = 100106.0005;
+
         $stopWatchD = new StopWatch('key', 'info');
         $stopWatchD->startTime = 100006.0006;
         $stopWatchD->stopTime = 100007.0006;
+
         $stopWatchBig2 = new StopWatch('key', 'info');
         $stopWatchBig2->startTime = 100007.0007;
         $stopWatchBig2->stopTime = 100108.0007;
@@ -412,15 +429,83 @@ final class TimingUtilityTest extends TestCase
         self::assertFalse($timingUtility->shouldTrack());
     }
 
+    /**
+     * @param list<string> $timings
+     * @param list<string> $expected
+     */
     #[Test]
-    public function chunkStringArray(): void
+    #[DataProvider('chunkStringArrayDataProvider')]
+    public function chunkStringArray(array $timings, int $maxLength, array $expected): void
     {
         $reflection = new ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('chunkStringArray');
         $reflectionMethod->setAccessible(true);
 
-        $result = $reflectionMethod->invoke($this->getTestInstance(), ['a', 'b', 'c', 'd', 'e', 'f'], 4);
-        self::assertSame(['a,b', 'c,d', 'e,f'], $result);
+        $result = $reflectionMethod->invoke($this->getTestInstance(), $timings, $maxLength);
+        self::assertSame($expected, $result);
+        self::assertIsList($result);
+    }
+
+    /**
+     * @return Generator<string, array{timings: list<string>, maxLength: int, expected: list<string>}>
+     */
+    public static function chunkStringArrayDataProvider(): Generator
+    {
+        yield 'maxLength 1' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 1,
+            'expected' => ['a', 'b', 'c', 'd', 'e', 'f'],
+        ];
+        yield 'maxLength 2' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 2,
+            'expected' => ['a', 'b', 'c', 'd', 'e', 'f'],
+        ];
+        yield 'maxLength 3' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 3,
+            'expected' => ['a,b', 'c,d', 'e,f'],
+        ];
+        yield 'maxLength 4' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 4,
+            'expected' => ['a,b', 'c,d', 'e,f'],
+        ];
+        yield 'maxLength 5' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 5,
+            'expected' => ['a,b,c', 'd,e,f'],
+        ];
+        yield 'maxLength 6' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 6,
+            'expected' => ['a,b,c', 'd,e,f'],
+        ];
+        yield 'maxLength 7' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 7,
+            'expected' => ['a,b,c,d', 'e,f'],
+        ];
+        yield 'maxLength 8' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 8,
+            'expected' => ['a,b,c,d', 'e,f'],
+        ];
+        yield 'maxLength 9' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 9,
+            'expected' => ['a,b,c,d,e', 'f'],
+        ];
+        yield 'maxLength 10' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 10,
+            'expected' => ['a,b,c,d,e', 'f'],
+        ];
+        yield 'maxLength 11' => [
+            'timings' => ['a', 'b', 'c', 'd', 'e', 'f'],
+            'maxLength' => 11,
+            'expected' => ['a,b,c,d,e,f'],
+        ];
     }
 
     /**

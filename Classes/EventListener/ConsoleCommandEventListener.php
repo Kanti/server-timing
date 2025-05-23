@@ -25,7 +25,7 @@ final class ConsoleCommandEventListener
     {
         $stopWatch = array_pop($this->stopWatches);
         if ($stopWatch === null) {
-            throw new Exception('No stopWatch found, did you start the command already?');
+            throw new Exception('No stopWatch found, did you start the command already?', 7800196394);
         }
 
         $stopWatch->stop();

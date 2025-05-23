@@ -7,9 +7,9 @@ namespace Kanti\ServerTiming\Utility;
 use Exception;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
+use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunction;
 use Kanti\ServerTiming\Service\RegisterShutdownFunction\RegisterShutdownFunctionInterface;
-use Kanti\ServerTiming\Service\ConfigService;
 use Kanti\ServerTiming\Service\SentryServiceInterface;
 use Psr\Http\Message\ResponseInterface;
 use SplObjectStorage;
@@ -21,8 +21,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class TimingUtility implements SingletonInterface
 {
     public const MAX_SINGLE_HEADER_SIZE = 2 ** 12;
-
-    private static ?TimingUtility $instance = null;
 
     private bool $registered = false;
 
@@ -43,7 +41,7 @@ final class TimingUtility implements SingletonInterface
 
     public static function getInstance(): TimingUtility
     {
-        return static::$instance ??= GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
+        return GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
     }
 
     /** @var StopWatch[] */
@@ -71,7 +69,7 @@ final class TimingUtility implements SingletonInterface
 
         $stop = $this->stopWatchInternal($key, $info);
         if (isset($this->stopWatchStack[$key])) {
-            throw new Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements');
+            throw new Exception('only one measurement at a time, use TimingUtility::stopWatch() for parallel measurements', 5736668171);
         }
 
         $this->stopWatchStack[$key] = $stop;
@@ -89,7 +87,7 @@ final class TimingUtility implements SingletonInterface
         }
 
         if (!isset($this->stopWatchStack[$key])) {
-            throw new Exception('where is no measurement with this key');
+            throw new Exception('where is no measurement with this key', 4685025557);
         }
 
         $stop = $this->stopWatchStack[$key];
@@ -301,7 +299,12 @@ final class TimingUtility implements SingletonInterface
         $length = 0;
         $index = 0;
         foreach ($timings as $timing) {
-            $length += 1 + strlen($timing);
+            if ($length <= 0) {
+                $length = strlen($timing);
+            } else {
+                $length += 1 + strlen($timing);
+            }
+
             if ($length > $maxLength) {
                 $index++;
                 $length = strlen($timing);

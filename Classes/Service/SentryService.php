@@ -268,7 +268,7 @@ final class SentryService implements SingletonInterface, SentryServiceInterface
                 'port' => $uri->getPort(),
                 'path' => $uri->getPath(),
             ]);
-            $description = ($info[0] ?? '') . ' ' . $partialUri . ' ' . ($info[2] ?? '');
+            $description = $info[0] . ' ' . $partialUri . ' ' . ($info[2] ?? '');
             $span->setData([
                 'http.query' => $uri->getQuery(),
                 'http.fragment' => $uri->getFragment(),
