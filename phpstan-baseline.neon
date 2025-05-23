@@ -469,3 +469,333 @@ parameters:
 			message: "#^Method Kanti\\\\ServerTiming\\\\SqlLogging\\\\LoggingStatement\\:\\:execute\\(\\) has parameter \\$params with no type specified\\.$#"
 			count: 1
 			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: '#^Property Kanti\\ServerTiming\\Dto\\StopWatch\:\:\$span has unknown class Sentry\\Tracing\\Span as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Dto/StopWatch.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\DBAL\\Configuration\:\:getSQLLogger\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\DBAL\\Configuration\:\:setSQLLogger\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: '#^Instantiated class Doctrine\\DBAL\\Logging\\LoggerChain not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Middleware/AdminpanelSqlLoggingMiddleware.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Kanti\\ServerTiming\\Dto\\StopWatch\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Classes/Middleware/WrapMiddleware.php
+
+		-
+			message: '#^Call to method finish\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method finish\(\) on an unknown class Sentry\\Tracing\\Transaction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method getOptions\(\) on an unknown class Sentry\\ClientInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setData\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setDescription\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setName\(\) on an unknown class Sentry\\Tracing\\TransactionContext\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setOp\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setOp\(\) on an unknown class Sentry\\Tracing\\TransactionContext\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setParentSpanId\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setStartTimestamp\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setStartTimestamp\(\) on an unknown class Sentry\\Tracing\\Transaction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method setStatus\(\) on an unknown class Sentry\\Tracing\\Transaction\.$#'
+			identifier: class.notFound
+			count: 2
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to method startChild\(\) on an unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to static method createFromHttpStatusCode\(\) on an unknown class Sentry\\Tracing\\SpanStatus\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to static method getCurrentHub\(\) on an unknown class Sentry\\SentrySdk\.$#'
+			identifier: class.notFound
+			count: 3
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to static method ok\(\) on an unknown class Sentry\\Tracing\\SpanStatus\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Call to static method unknownError\(\) on an unknown class Sentry\\Tracing\\SpanStatus\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Class Sentry\\Tracing\\Span not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Function Sentry\\continueTrace not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Function Sentry\\getBaggage not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Function Sentry\\getTraceparent not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Instantiated class Sentry\\Tracing\\SpanContext not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Instantiated class Sentry\\Tracing\\TransactionContext not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryService\:\:addResultToTransaction\(\) has invalid return type Sentry\\Tracing\\Transaction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryService\:\:createTransactionContextFromCli\(\) has invalid return type Sentry\\Tracing\\TransactionContext\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryService\:\:createTransactionContextFromRequest\(\) has invalid return type Sentry\\Tracing\\TransactionContext\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryService\:\:getSentryClient\(\) has invalid return type Sentry\\ClientInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryService\:\:startTransaction\(\) has invalid return type Sentry\\Tracing\\Transaction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryService\:\:startTransaction\(\) should return Sentry\\Tracing\\Transaction but returns Sentry\\Tracing\\Transaction\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$stack contains unknown class Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Parameter \$span of method Kanti\\ServerTiming\\Service\\SentryService\:\:updateSpan\(\) has invalid type Sentry\\Tracing\\Span\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Parameter \$transaction of method Kanti\\ServerTiming\\Service\\SentryService\:\:addResultToTransaction\(\) has invalid type Sentry\\Tracing\\Transaction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Property Kanti\\ServerTiming\\Service\\SentryService\:\:\$transaction has unknown class Sentry\\Tracing\\Transaction as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Used function Sentry\\continueTrace not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Used function Sentry\\getBaggage not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Used function Sentry\\getTraceparent not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: Classes/Service/SentryService.php
+
+		-
+			message: '#^Class TYPO3\\CMS\\Backend\\Http\\Application constructor invoked with 3 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: '#^Class TYPO3\\CMS\\Backend\\Http\\Application constructor invoked with 4 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: '#^Class TYPO3\\CMS\\Frontend\\Http\\Application constructor invoked with 3 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: '#^Class TYPO3\\CMS\\Frontend\\Http\\Application constructor invoked with 4 parameters, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Classes/ServiceProvider.php
+
+		-
+			message: '#^Parameter \#2 \$context of class TYPO3\\CMS\\Backend\\Http\\Application constructor expects TYPO3\\CMS\\Core\\Context\\Context, TYPO3\\CMS\\Core\\Configuration\\ConfigurationManager given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Classes/ServiceProvider.php
+
+		-
+			message: '#^Parameter \#2 \$context of class TYPO3\\CMS\\Frontend\\Http\\Application constructor expects TYPO3\\CMS\\Core\\Context\\Context, TYPO3\\CMS\\Core\\Configuration\\ConfigurationManager given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Classes/ServiceProvider.php
+
+		-
+			message: '#^Method Doctrine\\DBAL\\Driver\\Middleware\\AbstractStatementMiddleware\:\:execute\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\SqlLogging\\LoggingStatement\:\:execute\(\) has parameter \$params with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: Classes/SqlLogging/LoggingStatement.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Utility\\TimingUtility\:\:chunkStringArray\(\) should return list\<string\> but returns array\<int\<0, max\>, string\>\.$#'
+			identifier: return.type
+			count: 1
+			path: Classes/Utility/TimingUtility.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertIsFloat\(\) with float will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 3
+			path: Tests/TimingUtilityTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertIsFloat\(\) with null will always evaluate to false\.$#'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: Tests/TimingUtilityTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertIsList\(\) with list\<string\> will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: Tests/TimingUtilityTest.php
+
+		-
+			message: '#^Method Kanti\\ServerTiming\\Service\\SentryServiceInterface@anonymous/Tests/TimingUtilityTest\.php\:305\:\:sendSentryTrace\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: Tests/TimingUtilityTest.php
+
+		-
+			message: '#^Parameter \#1 \$expected of static method PHPUnit\\Framework\\Assert\:\:assertSame\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Tests/TimingUtilityTest.php
