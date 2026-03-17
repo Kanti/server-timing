@@ -7,6 +7,7 @@ namespace Kanti\ServerTiming\EventListener;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Symfony\Component\Mime\Email;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Mail\Event\AfterMailerSentMessageEvent;
 use TYPO3\CMS\Core\Mail\Event\BeforeMailerSentMessageEvent;
 
@@ -14,6 +15,7 @@ final class MailEventListener
 {
     public ?StopWatch $stopWatch = null;
 
+    #[AsEventListener('kanti/server-timing/mail-event-listener')]
     public function start(BeforeMailerSentMessageEvent $event): void
     {
         $info = '';
@@ -27,6 +29,7 @@ final class MailEventListener
         $this->stopWatch = TimingUtility::stopWatch('mail', $info);
     }
 
+    #[AsEventListener('kanti/server-timing/mail-event-listener')]
     public function stop(AfterMailerSentMessageEvent $event): void
     {
         $this->stopWatch?->stopIfNot();

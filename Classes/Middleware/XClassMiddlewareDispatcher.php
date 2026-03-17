@@ -35,7 +35,6 @@ final class XClassMiddlewareDispatcher extends MiddlewareDispatcher
         $stop->startTime = $_SERVER["REQUEST_TIME_FLOAT"];
         $stop->stop();
 
-        $request = $request->withAttribute('middleware.in.total', TimingUtility::stopWatch('middleware.in.total'));
         if ($this->tip instanceof WrapMiddleware) {
             $this->tip->isFirst();
         }
@@ -44,11 +43,6 @@ final class XClassMiddlewareDispatcher extends MiddlewareDispatcher
             $response = parent::handle($request);
         } catch (ImmediateResponseException $immediateResponseException) {
             $response = $immediateResponseException->getResponse();
-        }
-
-        try {
-            TimingUtility::end('middleware.out.total');
-        } catch (Exception) {
         }
 
         return TimingUtility::getInstance()->shutdown(ScriptResult::fromRequest($request, $response)) ?? $response;

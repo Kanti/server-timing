@@ -9,14 +9,15 @@ use Kanti\ServerTiming\Middleware\XClassMiddlewareDispatcher;
 use Psr\Container\ContainerInterface;
 use TYPO3\CMS\Backend\Http\Application as ApplicationBE;
 use TYPO3\CMS\Backend\Http\RequestHandler as RequestHandlerBe;
-use TYPO3\CMS\Core\Configuration\ConfigurationManager;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Package\AbstractServiceProvider;
-use TYPO3\CMS\Core\Routing\BackendEntryPointResolver;
 use TYPO3\CMS\Frontend\Http\Application as ApplicationFE;
 use TYPO3\CMS\Frontend\Http\RequestHandler as RequestHandlerFE;
 
+/**
+ * @deprecated can be removed if TYPO3 14 is lowest supported version
+ */
 final class ServiceProvider extends AbstractServiceProvider
 {
     protected static function getPackagePath(): string
@@ -34,6 +35,9 @@ final class ServiceProvider extends AbstractServiceProvider
      */
     public function getFactories(): array
     {
+        if ((new Typo3Version())->getMajorVersion() >= 14) {
+            return [];
+        }
         return [
             ApplicationFE::class => self::getApplicationFE(...),
             ApplicationBE::class => self::getApplicationBE(...),
@@ -47,25 +51,8 @@ final class ServiceProvider extends AbstractServiceProvider
             $container->get('frontend.middlewares'),
             $container,
         );
-        if (version_compare((new Typo3Version())->getBranch(), '13.0', '>=')) {
-            return new ApplicationFE(
-                $requestHandler,
-                $container->get(Context::class),
-            );
-        }
-
-        if (version_compare((new Typo3Version())->getBranch(), '12.0', '>=') && class_exists(BackendEntryPointResolver::class)) {
-            return new ApplicationFE(
-                $requestHandler,
-                $container->get(ConfigurationManager::class),
-                $container->get(Context::class),
-                $container->get(BackendEntryPointResolver::class),
-            );
-        }
-
         return new ApplicationFE(
             $requestHandler,
-            $container->get(ConfigurationManager::class),
             $container->get(Context::class),
         );
     }
@@ -77,25 +64,8 @@ final class ServiceProvider extends AbstractServiceProvider
             $container->get('backend.middlewares'),
             $container,
         );
-        if (version_compare((new Typo3Version())->getBranch(), '13.0', '>=')) {
-            return new ApplicationBE(
-                $requestHandler,
-                $container->get(Context::class),
-            );
-        }
-
-        if (version_compare((new Typo3Version())->getBranch(), '12.0', '>=') && class_exists(BackendEntryPointResolver::class)) {
-            return new ApplicationBE(
-                $requestHandler,
-                $container->get(ConfigurationManager::class),
-                $container->get(Context::class),
-                $container->get(BackendEntryPointResolver::class),
-            );
-        }
-
         return new ApplicationBE(
             $requestHandler,
-            $container->get(ConfigurationManager::class),
             $container->get(Context::class),
         );
     }
