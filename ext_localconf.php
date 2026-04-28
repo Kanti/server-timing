@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Kanti\ServerTiming\DataProcessor\XClassContentDataProcessor;
 use Kanti\ServerTiming\Extbase\XClassExtbaseDispatcher;
 use Kanti\ServerTiming\SqlLogging\LoggingMiddleware;

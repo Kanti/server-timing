@@ -5,9 +5,10 @@ use Composer\InstalledVersions;
 /** @var string $_EXTKEY */
 try {
     $version = InstalledVersions::getPrettyVersion('kanti/server-timing');
-} catch (Exception $e) {
+} catch (Exception) {
     $version = '99.99.99'; // allow install in typo3-main
 }
+
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Kanti: server-timing',
     'description' => 'Show timings of Database and HTTP Calls (send them to Sentry)',

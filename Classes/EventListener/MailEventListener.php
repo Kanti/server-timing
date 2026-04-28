@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\EventListener;
 
+use Symfony\Component\Mime\Address;
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
 use Symfony\Component\Mime\Email;
@@ -21,7 +22,7 @@ final class MailEventListener
         $info = '';
         $message = $event->getMessage();
         if ($message instanceof Email) {
-            $emails = implode(', ', array_map(static fn($address): string => $address->getAddress(), $message->getTo()));
+            $emails = implode(', ', array_map(static fn(Address $address): string => $address->getAddress(), $message->getTo()));
             $info = $message->getSubject() . ' -> ' . $emails;
         }
 

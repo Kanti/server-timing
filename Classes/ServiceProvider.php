@@ -38,6 +38,7 @@ final class ServiceProvider extends AbstractServiceProvider
         if ((new Typo3Version())->getMajorVersion() >= 14) {
             return [];
         }
+
         return [
             ApplicationFE::class => self::getApplicationFE(...),
             ApplicationBE::class => self::getApplicationBE(...),

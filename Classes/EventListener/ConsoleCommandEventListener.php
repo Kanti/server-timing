@@ -36,10 +36,11 @@ final class ConsoleCommandEventListener
         if (!$this->stopWatches) {
             TimingUtility::getInstance()->shutdown(ScriptResult::fromCli($event->getExitCode()));
         }
+
         $event->getOutput()->writeln(
             sprintf(
-                "<info>server_timing:</info> Command \"%s\" took %.4fs",
-                $event->getCommand()->getName(),
+                '<info>server_timing:</info> Command "%s" took %.4fs',
+                (string)$event->getCommand()?->getName(),
                 $stopWatch->getDuration(),
             ),
             OutputInterface::VERBOSITY_VERBOSE,

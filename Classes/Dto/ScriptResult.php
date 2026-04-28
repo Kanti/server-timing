@@ -9,10 +9,13 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\ServerRequestFactory;
 
-final class ScriptResult
+final readonly class ScriptResult
 {
-    private function __construct(public readonly ?ServerRequestInterface $request, public readonly ?ResponseInterface $response, public readonly ?int $cliExitCode)
-    {
+    private function __construct(
+        public ?ServerRequestInterface $request,
+        public ?ResponseInterface $response,
+        public ?int $cliExitCode,
+    ) {
     }
 
     public static function fromRequest(ServerRequestInterface $request, ?ResponseInterface $response = null): ScriptResult
