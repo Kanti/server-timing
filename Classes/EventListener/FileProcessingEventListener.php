@@ -6,6 +6,7 @@ namespace Kanti\ServerTiming\EventListener;
 
 use Kanti\ServerTiming\Dto\StopWatch;
 use Kanti\ServerTiming\Utility\TimingUtility;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Resource\Event\AfterFileProcessingEvent;
 use TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent;
 
@@ -13,6 +14,7 @@ final class FileProcessingEventListener
 {
     public StopWatch|null $stopWatch = null;
 
+    #[AsEventListener('kanti/server-timing/file-processing')]
     public function before(BeforeFileProcessingEvent $event): void
     {
         if (!$event->getProcessedFile()->isProcessed()) {
@@ -21,6 +23,7 @@ final class FileProcessingEventListener
         }
     }
 
+    #[AsEventListener('kanti/server-timing/file-processing')]
     public function after(AfterFileProcessingEvent $event): void
     {
         $this->stopWatch?->stopIfNot();

@@ -315,7 +315,7 @@ final class TimingUtilityTest extends TestCase
                 /**
                  * @param list<StopWatch> $stopWatches
                  */
-                public function sendSentryTrace(ScriptResult $result, array $stopWatches): ?ResponseInterface
+                public function sendSentryTrace(ScriptResult $result, array $stopWatches): ResponseInterface
                 {
                     $sortedWatches = $stopWatches;
                     usort($sortedWatches, static fn($a, $b): int => $b->stopTime <=> $a->stopTime);
@@ -443,7 +443,6 @@ final class TimingUtilityTest extends TestCase
     {
         $reflection = new ReflectionClass(TimingUtility::class);
         $reflectionMethod = $reflection->getMethod('chunkStringArray');
-        $reflectionMethod->setAccessible(true);
 
         $result = $reflectionMethod->invoke($this->getTestInstance(), $timings, $maxLength);
         self::assertSame($expected, $result);

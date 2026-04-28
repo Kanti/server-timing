@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kanti\ServerTiming\Service;
 
+use Exception;
 use GuzzleHttp\Psr7\Uri;
 use Kanti\ServerTiming\Dto\ScriptResult;
 use Kanti\ServerTiming\Dto\StopWatch;
@@ -79,6 +80,10 @@ final class SentryService implements SingletonInterface, SentryServiceInterface
 
             if ($stopWatch->key === 'php') {
                 continue;
+            }
+
+            if ($stack === []) {
+                throw new Exception('No parent span found for stopWatch ' . $stopWatch->key, 7800196395);
             }
 
             $parent = $stack[array_key_last($stack)];

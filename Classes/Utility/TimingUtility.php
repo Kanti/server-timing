@@ -43,7 +43,7 @@ final class TimingUtility implements SingletonInterface
 
     public static function getInstance(): TimingUtility
     {
-        return static::$instance ??= GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
+        return self::$instance ??= GeneralUtility::makeInstance(TimingUtility::class, new RegisterShutdownFunction(), new ConfigService());
     }
 
     /** @var StopWatch[] */
@@ -189,7 +189,7 @@ final class TimingUtility implements SingletonInterface
     private function humanReadableFileSize(int $size): string
     {
         $fileSizeNames = [" Bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB"];
-        $i = floor(log($size, self::BYTE_MULTIPLICATOR));
+        $i = (int)floor(log($size, self::BYTE_MULTIPLICATOR));
         return $size ? round($size / (self::BYTE_MULTIPLICATOR ** $i), 2) . $fileSizeNames[$i] : '0 Bytes';
     }
 

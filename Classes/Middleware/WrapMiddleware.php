@@ -35,15 +35,9 @@ final class WrapMiddleware implements RequestHandlerInterface
         self::$middlewareIn?->stopIfNot();
         self::$middlewareIn = TimingUtility::stopWatch($this->isKernel ? 'requestHandler' : 'middleware.in', $this->info);
 
-        if ($this->isKernel) {
-            $request->getAttribute('middleware.in.total')?->stop();
-        }
 
         $response = $this->requestHandler->handle($request);
 
-        if ($this->isKernel) {
-            TimingUtility::start('middleware.out.total');
-        }
 
         // if it was the requestHandler:
         self::$middlewareIn?->stopIfNot();

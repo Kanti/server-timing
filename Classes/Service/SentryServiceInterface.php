@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kanti\ServerTiming\Service;
 
 use Kanti\ServerTiming\Dto\ScriptResult;

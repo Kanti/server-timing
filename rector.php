@@ -9,6 +9,7 @@ use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\DeadCode\Rector\Cast\RecastingRemovalRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPublicMethodParameterRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ParamTypeByMethodCallTypeRector;
+use Ssch\TYPO3Rector\CodeQuality\General\GeneralUtilityMakeInstanceToConstructorPropertyRector;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->parallel();
@@ -46,8 +47,8 @@ return static function (RectorConfig $rectorConfig): void {
             RecastingRemovalRector::class => [
                 __DIR__ . '/Classes/SqlLogging/LoggingConnection.php',
             ],
-            ParamTypeByMethodCallTypeRector::class => [
-                __DIR__ . '/Classes/SqlLogging/SqlLoggerCore11.php',
+            GeneralUtilityMakeInstanceToConstructorPropertyRector::class => [
+                __DIR__ . '/Classes/Utility/TimingUtility.php',
             ],
             //__DIR__ . '/src/Example',
             //__DIR__ . '/src/Example.php',

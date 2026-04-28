@@ -9,4 +9,4 @@ parameters:
       requestGetAttributeMapping:
           middleware.in.total: Kanti\ServerTiming\Dto\StopWatch|null
   excludePaths:
-    - Classes/SqlLogging/SqlLoggerCore11.php
+    - Classes/DataProcessor/XClassContentDataProcessor.php

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
 services:
   _defaults:
     autowire: true
@@ -17,48 +18,35 @@ services:
   Kanti\ServerTiming\Service\SentryServiceInterface:
     class: Kanti\ServerTiming\Service\SentryService
 
-  Kanti\ServerTiming\EventListener\ConsoleCommandEventListener:
-    tags:
-      -
-        name: event.listener
-        identifier: kanti/server-timing/console-command-event-listener
-        event: Symfony\Component\Console\Event\ConsoleCommandEvent
-        method: start
-      -
-        name: event.listener
-        identifier: kanti/server-timing/console-terminate-event-listener
-        event: Symfony\Component\Console\Event\ConsoleTerminateEvent
-        method: stop
+  TYPO3\CMS\Extbase\Mvc\Dispatcher:
+    class: Kanti\ServerTiming\Extbase\XClassExtbaseDispatcher
 
-  Kanti\ServerTiming\EventListener\MailEventListener:
-    tags:
-      -
-        name: event.listener
-        identifier: kanti/server-timing/mail-event-listener
-        event: TYPO3\CMS\Core\Mail\Event\BeforeMailerSentMessageEvent
-        method: start
-      -
-        name: event.listener
-        identifier: kanti/server-timing/mail-event-listener
-        event: TYPO3\CMS\Core\Mail\Event\AfterMailerSentMessageEvent
-        method: stop
-  Kanti\ServerTiming\EventListener\BootCompletedEventListener:
-    tags:
-      -
-        name: event.listener
-        identifier: kanti/server-timing/boot-completed-event-listener
-        event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
+  # this only works in >=v14
+  TYPO3\CMS\Core\Http\Application:
+    arguments:
+      $requestHandler: '@xclass-core-middleware-dispatcher'
+  'xclass-core-middleware-dispatcher':
+    class: Kanti\ServerTiming\Middleware\XClassMiddlewareDispatcher
+    arguments:
+      $kernel: '@TYPO3\CMS\Core\Http\RequestHandler'
+      $middlewares: '@core.middlewares'
 
-  Kanti\ServerTiming\EventListener\FileProcessingEventListener:
-    tags:
-      -
-        name: event.listener
-        identifier: kanti/server-timing/file-processing
-        event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
-        method: before
+  # this only works in >=v14
+  TYPO3\CMS\Backend\Http\Application:
+    arguments:
+      $requestHandler: '@xclass-backend-middleware-dispatcher'
+  'xclass-backend-middleware-dispatcher':
+    class: Kanti\ServerTiming\Middleware\XClassMiddlewareDispatcher
+    arguments:
+      $kernel: '@TYPO3\CMS\Backend\Http\RequestHandler'
+      $middlewares: '@backend.middlewares'
 
-      -
-        name: event.listener
-        identifier: kanti/server-timing/file-processing
-        event: TYPO3\CMS\Core\Resource\Event\AfterFileProcessingEvent
-        method: after
+  # this only works in >=v14
+  TYPO3\CMS\Frontend\Http\Application:
+    arguments:
+      $requestHandler: '@xclass-frontend-middleware-dispatcher'
+  'xclass-frontend-middleware-dispatcher':
+    class: Kanti\ServerTiming\Middleware\XClassMiddlewareDispatcher
+    arguments:
+      $kernel: '@TYPO3\CMS\Frontend\Http\RequestHandler'
+      $middlewares: '@frontend.middlewares'
