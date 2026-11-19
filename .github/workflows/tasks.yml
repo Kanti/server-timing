@@ -30,6 +30,9 @@ jobs:
       - run: composer remove sentry/sdk --dev --ignore-platform-req=php+
         if: ${{ ! matrix.sentry }}
       - run: composer install --no-interaction --no-progress --ignore-platform-req=php+
+      # --ignore-platform-req=php+ may only skip the PHP check of dev dependencies (e.g. phpro/grumphp)
+      - if: matrix.php == '8.6'
+        run: composer check-platform-reqs --no-dev
       - run: ./vendor/bin/grumphp run --ansi
       - run: composer test
       - run: jq 'del(.logs.html)' infection.json > infection.json.new && mv infection.json.new infection.json
