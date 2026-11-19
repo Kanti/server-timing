@@ -201,9 +201,7 @@ final class TimingUtility implements SingletonInterface
     {
         $elementsByKey = [];
         foreach ($initalStopWatches as $stopWatch) {
-            if (!isset($elementsByKey[$stopWatch->key])) {
-                $elementsByKey[$stopWatch->key] = [];
-            }
+            $elementsByKey[$stopWatch->key] ??= [];
 
             $elementsByKey[$stopWatch->key][] = $stopWatch;
         }
